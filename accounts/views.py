@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
@@ -29,6 +30,7 @@ def user_login(request):
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
             if user is not None:
+                # TODO: redirect to home page start web quest
                 login(request, user)
                 return HttpResponse(f'Hello {request.user.username}')
             else:
@@ -42,3 +44,11 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('login')  # После выхода перенаправляем на страницу входа
+
+
+def presentation(request):
+    return render(request, 'accounts/presentation_first.html')
+
+
+def sec_page(request):
+    return render(request, 'accounts/presentation_sec.html')
