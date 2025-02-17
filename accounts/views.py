@@ -47,5 +47,8 @@ def user_logout(request):
 
 
 def presentation(request):
-    pass
-    # TODO: Создать страницы презентация о квесте!
+    return render(request, 'accounts/presentation_first.html')
+
+
+def sec_page(request):
+    return render(request, 'accounts/presentation_sec.html')

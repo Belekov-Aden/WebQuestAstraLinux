@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web-Quest</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+    <script defer src="{% static 'accounts/js/scripts.js' %}"></script>
+
+</head>
+<body>
+    <div class="container">
+        <img src="{% static 'accounts/img/Звезда.png' %}" alt="Персонаж" class="character">
+        <h1>Добро пожаловать в web-квест<br>Я Системный Наставник</h1>
+        <a href="{% url 'sec_page' %}" class="btn transition">
+            →
+        </a>
+    </div>
+</body>
+</html>
