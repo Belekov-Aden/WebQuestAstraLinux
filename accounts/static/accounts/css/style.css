@@ -113,3 +113,105 @@ h1, p {
     opacity: 0;
 }
 
+
+.container {
+    text-align: center;
+}
+
+.header {
+    position: relative;
+}
+
+.star {
+    width: 120px;
+    animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        filter: drop-shadow(0 0 10px yellow);
+    }
+    to {
+        filter: drop-shadow(0 0 20px yellow);
+    }
+}
+
+.form-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 300px;
+    backdrop-filter: blur(10px);
+}
+
+h2 {
+    color: white;
+    font-size: 22px;
+}
+
+label {
+    display: block;
+    text-align: left;
+    color: white;
+    margin: 10px 0 5px;
+}
+
+input {
+    width: 95%;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+input::placeholder {
+    color: white;
+}
+
+.buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.light {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    border: 1px solid white;
+}
+
+.light:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.dark {
+    background: white;
+    color: black;
+}
+
+.dark:hover {
+    background: gray;
+}
+
+.arrow {
+    margin-top: 20px;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+
+a {
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+a:hover {
+    color: yellow;
+    text-shadow: 0 0 5px yellow, 0 0 10px yellow, 0 0 15px yellow;
+}
+

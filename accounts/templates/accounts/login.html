@@ -1,7 +1,32 @@
-<h2>Вход</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Войти</button>
-</form>
-<p>Нет аккаунта? <a href="{% url 'signup' %}">Зарегистрироваться</a></p>
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+    <script defer src="{% static 'accounts/js/scripts.js' %}"></script>
+
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="{% static 'accounts/img/Очки.png' %}" alt="Star" class="star">
+    </div>
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Войти</button>
+            <p>Нет аккаунта? <a href="{% url 'signup' %}">Зарегистрироваться</a></p>
+
+        </form>
+    </div>
+    <a href="#" class="btn">→</a>
+</div>
+</body>
+</html>
+
+
+
