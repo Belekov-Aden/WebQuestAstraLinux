@@ -84,7 +84,7 @@ body {
     filter: drop-shadow(0 0 30px yellow);
 }
 
-h1, p {
+h1 {
     font-size: 55px;
     font-weight: bold;
 }
