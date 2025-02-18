@@ -55,3 +55,7 @@ def sec_page(request):
 
 def seven_levels(request):
     return render(request, 'accounts/seven_levels.html')
+
+
+def map(request):
+    return render(request, 'accounts/map.html')

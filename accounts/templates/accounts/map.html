@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта квеста</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0f1c49, #1e3a8a);
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .stage {
+            position: absolute;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .stage:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Позиции этапов */
+        #stage1 {
+            top: 10%;
+            left: 10%;
+        }
+
+        #stage2 {
+            top: 25%;
+            left: 30%;
+        }
+
+        #stage3 {
+            top: 40%;
+            left: 15%;
+        }
+
+        #stage4 {
+            top: 55%;
+            left: 25%;
+        }
+
+        #stage5 {
+            top: 50%;
+            left: 50%;
+        }
+
+        #stage6 {
+            top: 35%;
+            left: 70%;
+        }
+
+        #stage7 {
+            top: 60%;
+            left: 80%;
+        }
+    </style>
+</head>
+<body>
+<div class="map-container">
+    <div id="stage1" class="stage">1. Знакомство с Astra Linux</div>
+    <div id="stage2" class="stage">2. Основы командной строки</div>
+    <div id="stage3" class="stage">3. Работа с файлами</div>
+    <div id="stage4" class="stage">4. Основы безопасности</div>
+    <div id="stage5" class="stage">5. Конфигурационные файлы</div>
+    <div id="stage6" class="stage">6. Оптимизация системы</div>
+    <div id="stage7" class="stage">7. Финальное задание</div>
+</div>
+</body>
+</html>
