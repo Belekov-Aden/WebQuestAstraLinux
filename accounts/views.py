@@ -30,9 +30,8 @@ def user_login(request):
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                # TODO: redirect to home page start web quest
                 login(request, user)
-                return HttpResponse(f'Hello {request.user.username}')
+                return redirect('seven_levels')
             else:
                 form.add_error(None, "Неверное имя пользователя или пароль")
     else:
@@ -52,3 +51,7 @@ def presentation(request):
 
 def sec_page(request):
     return render(request, 'accounts/presentation_sec.html')
+
+
+def seven_levels(request):
+    return render(request, 'accounts/seven_levels.html')
