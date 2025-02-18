@@ -1,0 +1,135 @@
+* {
+    font-family: Bahnschrift, sans-serif;
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to bottom, #0f1c49, #1e3a8a);
+    color: white;
+    text-align: center;
+}
+
+/* Контейнер формы —  за которой прячется звезда */
+.registration-container {
+    position: relative;
+    overflow: hidden;     /* Обрезаю всё, что выходит за левую границу */
+    background: #2f3e8f;
+    width: 360px;
+    padding: 30px;
+    border-radius: 40px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    margin: 0 auto;
+}
+.star {
+    position: absolute;
+    top: 40%;
+    left: -90px;
+    transform: translateY(-50%) rotate(0deg);
+    width: 100px;
+    transition: left 0.8s ease, transform 0.8s ease;
+    z-index: 0;
+}
+.registration-container:hover .star {
+    left: -60px;
+    transform: translateY(-50%) rotate(15deg);
+}
+
+/* Стили для формы */
+form p {
+    cursor: default;
+    margin-bottom: 15px;
+    text-align: left;
+}
+form label {
+    display: block;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: white;
+    padding: 10px 0 0 0;
+}
+form input[type="text"],
+form input[type="password"],
+form input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid white;
+    border-radius: 25px;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: background 0.3s, border-color 0.3s;
+    margin-bottom: 5px;
+}
+form input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+form input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+}
+
+/* Стили для памяток */
+.helptext {
+    font-size: 14px;
+    font-style: italic;
+    color: #ddd;
+}
+ul {
+    font-size: 14px;
+    font-style: italic;
+    color: #ddd;
+    text-align: left;
+    padding-left: 10px;
+    padding-top: 0px;
+}
+ul.errorlist {
+    margin: 5px 0 0 0;
+    padding-left: 20px;
+    list-style-type: disc;
+    color: #ffcccc;
+    font-size: 14px;
+    font-style: italic;
+}
+
+/* Кнопка */
+form button {
+    margin-top: 10px;
+    padding: 12px;
+    width: 100%;
+    border: 2px solid white;
+    border-radius: 25px;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+form button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Ссылка для входа */
+form a {
+    padding: 0 0 0 0px;
+    margin-top: 15px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+}
+form a:hover {
+    color: yellow;
+    text-shadow: 0 0 5px yellow, 0 0 10px yellow, 0 0 15px yellow;
+}
+
+.login {
+    text-align: center;
+}

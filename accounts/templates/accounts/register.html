@@ -1,8 +1,21 @@
 {% load static %}
-<link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Регистрация</button>
-    <a href="{% url 'login' %}">Есть аккаунт? Войти</a>
-</form>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Регистрация</title>
+  <link rel="stylesheet" href="{% static 'accounts/css/style_reg.css' %}">
+</head>
+<body>
+  <div class="registration-container">
+    <!-- Звезда, которая изначально скрыта за левым краем и при наведении поворачивается -->
+    <img src="{% static 'accounts/img/Звезда.png' %}" alt="Star" class="star">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Регистрация</button>
+      <p class="login">Есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+    </form>
+  </div>
+</body>
+</html>
