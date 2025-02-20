@@ -2,173 +2,286 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Карта квеста</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(to bottom, #0f1c49, #1e3a8a);
-            font-family: Arial, sans-serif;
-            color: white;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карта квеста</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #0f1c49, #1e3a8a);
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+    }
 
-        .map-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-        }
+    .map-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
 
-        .stage {
-            position: absolute;
-            padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
+    .stage {
+      position: absolute;
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
 
-        .stage:hover {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8); /* Желтое свечение */
-        }
+    .stage:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+    }
 
+    .icon {
+      width: 100%;
+      height: 100px;
+    }
 
-        .icon {
-            width: 100%;
-            height: 100px;
-        }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
 
-        .arrow {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: url('arrow.svg') no-repeat center center;
-            background-size: contain;
-        }
-
-        /* Позиции этапов */
-        #stage1 {
-            top: 10%;
-            left: 10%;
-        }
-
-        #stage2 {
-            top: 25%;
-            left: 30%;
-        }
-
-        #stage3 {
-            top: 40%;
-            left: 15%;
-        }
-
-        #stage4 {
-        top: 55%;
-            left: 31%;
-        }
-
-        #stage5 {
-            top: 50%;
-            left: 50%;
-        }
-
-        #stage6 {
-            top: 35%;
-            left: 70%;
-        }
-
-        #stage7 {
-            top: 60%;
-            left: 80%;
-        }
-
-        /* Позиции стрелок */
-        #arrow1 {
-            top: 18%;
-            left: 22%;
-            transform: rotate(30deg);
-        }
-
-        #arrow2 {
-            top: 33%;
-            left: 22%;
-            transform: rotate(-20deg);
-        }
-
-        #arrow3 {
-            top: 48%;
-            left: 20%;
-            transform: rotate(15deg);
-        }
-
-        #arrow4 {
-            top: 53%;
-            left: 38%;
-            transform: rotate(-10deg);
-        }
-
-        #arrow5 {
-            top: 42%;
-            left: 60%;
-            transform: rotate(25deg);
-        }
-
-        #arrow6 {
-            top: 55%;
-            left: 75%;
-            transform: rotate(15deg);
-        }
-    </style>
+    /* Позиции этапов */
+    #stage1 { top: 10%; left: 10%; }
+    #stage2 { top: 25%; left: 30%; }
+    #stage3 { top: 40%; left: 15%; }
+    #stage4 { top: 55%; left: 31%; }
+    #stage5 { top: 50%; left: 50%; }
+    #stage6 { top: 35%; left: 70%; }
+    #stage7 { top: 60%; left: 80%; }
+  </style>
 </head>
 <body>
-<div class="map-container">
+  <div class="map-container">
+    <canvas id="arrowCanvas"></canvas>
     <div id="stage1" class="stage" onclick="window.location.href='{% url 'stage_one_main' %}';">
-        1. Знакомство с Astra Linux
-        <img src="{% static 'accounts/img/astra_linux_white.png' %}" class="icon" alt="Иконка">
+      1. Знакомство с Astra Linux
+      <img src="{% static 'accounts/img/astra_linux_white.png' %}" class="icon" alt="Иконка">
     </div>
     <div id="stage2" class="stage">
-        2. Основы командной строки
-        <i class="icon fa-solid fa-terminal fa-6x"></i>
+      2. Основы командной строки
+      <i class="icon fa-solid fa-terminal fa-6x"></i>
     </div>
     <div id="stage3" class="stage">
-        3. Работа с файлами
-        <i class="icon fa-solid fa-file fa-6x"></i>
+      3. Работа с файлами
+      <i class="icon fa-solid fa-file fa-6x"></i>
     </div>
     <div id="stage4" class="stage">
-        4. Основы безопасности
-        <i class="icon fa-solid fa-shield fa-6x"></i>
+      4. Основы безопасности
+      <i class="icon fa-solid fa-shield fa-6x"></i>
     </div>
     <div id="stage5" class="stage">
-        5. Конфигурационные файлы
-        <i class="icon fa-solid fa-gears fa-6x"></i>
+      5. Конфигурационные файлы
+      <i class="icon fa-solid fa-gears fa-6x"></i>
     </div>
     <div id="stage6" class="stage">
-        6. Оптимизация системы
-        <i class="icon fa-solid fa-rotate-right fa-6x"></i>
+      6. Оптимизация системы
+      <i class="icon fa-solid fa-rotate-right fa-6x"></i>
     </div>
     <div id="stage7" class="stage">
-        7. Финальное задание
-        <i class="icon fa-solid fa-bars-progress fa-6x"></i>
+      7. Финальное задание
+      <i class="icon fa-solid fa-bars-progress fa-6x"></i>
     </div>
+  </div>
 
-<!--    <div id="arrow1" class="arrow"></div>-->
-<!--    <div id="arrow2" class="arrow"></div>-->
-<!--    <div id="arrow3" class="arrow"></div>-->
-<!--    <div id="arrow4" class="arrow"></div>-->
-<!--    <div id="arrow5" class="arrow"></div>-->
-<!--    <div id="arrow6" class="arrow"></div>-->
-</div>
-<script src="https://kit.fontawesome.com/f6a8e85efb.js" crossorigin="anonymous"></script>
+  <script>
+      // Функция для получения текущего масштабирования элемента (предполагается равномерный scale)
+      function getScale(element) {
+        const style = window.getComputedStyle(element);
+        const transform = style.transform;
+        if (transform && transform !== 'none') {
+          const match = transform.match(/matrix\(([^)]+)\)/);
+          if (match) {
+            const values = match[1].split(',').map(parseFloat);
+            return values[0]; // если scaleX == scaleY
+          }
+        }
+        return 1;
+      }
+
+      // Глобальное множество для отслеживания hovered-блоков
+      const hoveredStages = new Set();
+      let animationFrameId = null;
+
+      // Настройка стрелок
+      const arrows = [
+        { from: 'stage1', to: 'stage2', offset: -70, shiftX: 50, shiftY: -40 },
+        { from: 'stage2', to: 'stage3', offset: -50, shiftY: 35 },
+        { from: 'stage3', to: 'stage4', offset: 50, shiftX: -15, shiftY: 35 },
+        { from: 'stage4', to: 'stage5', offset: -60, shiftX: -27, shiftY: -68 },
+        { from: 'stage5', to: 'stage6', offset: 50, shiftX: 35, shiftY: 40 },
+        { from: 'stage6', to: 'stage7', offset: -20, shiftX: 60, shiftY: -5, extraLength: 17 }
+      ];
+
+      // Функция для отрисовки стрелок
+      function drawArrows() {
+        const canvas = document.getElementById('arrowCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = 'yellow';
+        ctx.lineWidth = 3;
+        ctx.fillStyle = 'yellow';
+
+        // Базовый gap и дополнительный gap при hover
+        const baseGap = 35;
+        const extraGap = 10;
+
+        // Функция для отрисовки одной изогнутой стрелки
+        // gapFrom и gapTo задают отступ от начала и конца
+        function drawCurvedArrow(
+          x1, y1, x2, y2,
+          offset, r1, r2,
+          shiftX = 0, shiftY = 0,
+          extraLength = 0,
+          gapFrom = baseGap, gapTo = baseGap
+        ) {
+          let arrowSize = 10;
+
+          // Применяем сдвиг
+          x1 += shiftX;
+          x2 += shiftX;
+          y1 += shiftY;
+          y2 += shiftY;
+
+          let dx = x2 - x1;
+          let dy = y2 - y1;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          let ux = dx / dist;
+          let uy = dy / dist;
+
+          // Применяем gap для начала и конца отдельно
+          x1 += ux * (r1 + gapFrom);
+          y1 += uy * (r1 + gapFrom);
+          x2 -= ux * (r2 + gapTo);
+          y2 -= uy * (r2 + gapTo);
+
+          // Если нужно растянуть дугу
+          x1 -= ux * extraLength;
+          y1 -= uy * extraLength;
+          x2 += ux * extraLength;
+          y2 += uy * extraLength;
+
+          // Вычисляем середину отрезка
+          let mx = (x1 + x2) / 2;
+          let my = (y1 + y2) / 2;
+
+          // Вычисляем перпендикулярный вектор для изгиба
+          let perpX = -dy;
+          let perpY = dx;
+          let perpLen = Math.sqrt(perpX * perpX + perpY * perpY);
+          perpX = (perpX / perpLen) * offset;
+          perpY = (perpY / perpLen) * offset;
+
+          // Контрольная точка для дуги
+          let cx = mx + perpX;
+          let cy = my + perpY;
+
+          // Рисуем дугу
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.quadraticCurveTo(cx, cy, x2, y2);
+          ctx.stroke();
+
+          // Вычисляем угол касательной (вектор от контрольной точки к концу дуги)
+          let dxArrow = x2 - cx;
+          let dyArrow = y2 - cy;
+          let angle = Math.atan2(dyArrow, dxArrow);
+
+          // Сдвигаем наконечник вдоль касательной
+          let arrowTipShift = 7;
+          let tipX = x2 + arrowTipShift * Math.cos(angle);
+          let tipY = y2 + arrowTipShift * Math.sin(angle);
+
+          // Рисуем наконечник
+          ctx.beginPath();
+          ctx.moveTo(tipX, tipY);
+          ctx.lineTo(
+            tipX - arrowSize * Math.cos(angle - Math.PI / 6),
+            tipY - arrowSize * Math.sin(angle - Math.PI / 6)
+          );
+          ctx.lineTo(
+            tipX - arrowSize * Math.cos(angle + Math.PI / 6),
+            tipY - arrowSize * Math.sin(angle + Math.PI / 6)
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Рисуем все стрелки, вычисляя динамический gap с учётом текущего scale блока
+        arrows.forEach(({ from, to, offset, shiftX = 0, shiftY = 0, extraLength = 0 }) => {
+          const fromEl = document.getElementById(from);
+          const toEl = document.getElementById(to);
+          const fromRect = fromEl.getBoundingClientRect();
+          const toRect = toEl.getBoundingClientRect();
+
+          let x1 = fromRect.left + fromRect.width / 2;
+          let y1 = fromRect.top + fromRect.height / 2;
+          let x2 = toRect.left + toRect.width / 2;
+          let y2 = toRect.top + toRect.height / 2;
+
+          let r1 = Math.min(fromRect.width, fromRect.height) / 2;
+          let r2 = Math.min(toRect.width, toRect.height) / 2;
+
+          // Если блок hover, вычисляем его текущий scale и корректируем gap
+          let scaleFrom = hoveredStages.has(from) ? getScale(fromEl) : 1;
+          let scaleTo   = hoveredStages.has(to)   ? getScale(toEl)   : 1;
+          let gapFrom = baseGap + extraGap * (scaleFrom - 1);
+          let gapTo   = baseGap + extraGap * (scaleTo - 1);
+
+          drawCurvedArrow(x1, y1, x2, y2, offset, r1, r2, shiftX, shiftY, extraLength, gapFrom, gapTo);
+        });
+      }
+
+      // Функция, которая постоянно обновляет стрелки, пока хотя бы один блок hover
+      function updateArrows() {
+        drawArrows();
+        animationFrameId = requestAnimationFrame(updateArrows);
+      }
+
+      // Обработчики событий для всех блоков
+      document.querySelectorAll('.stage').forEach(stage => {
+        stage.addEventListener('mouseenter', () => {
+          hoveredStages.add(stage.id);
+          if (!animationFrameId) {
+            updateArrows();
+          }
+        });
+        stage.addEventListener('mouseleave', () => {
+          hoveredStages.delete(stage.id);
+          // Ждем 300 мс (время анимации), затем останавливаем, если ни один блок не hover
+          setTimeout(() => {
+            if (hoveredStages.size === 0 && animationFrameId) {
+              cancelAnimationFrame(animationFrameId);
+              animationFrameId = null;
+              drawArrows();
+            }
+          }, 300);
+        });
+      });
+
+      window.onload = drawArrows;
+      window.onresize = drawArrows;
+    </script>
+
+  <script src="https://kit.fontawesome.com/f6a8e85efb.js" crossorigin="anonymous"></script>
 </body>
 </html>
