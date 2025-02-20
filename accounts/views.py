@@ -79,6 +79,7 @@ def stage_one_task(request):
 @csrf_exempt
 def save_quiz_result(request):
     # Первый квест!
+    # TODO: Возможность, сохранение наилучшего результата только!
     if request.method == "POST":
         data = json.loads(request.body)
         user = request.user
