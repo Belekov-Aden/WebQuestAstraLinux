@@ -1,9 +1,13 @@
+import json
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 
 from .forms import RegisterUserForm, LoginForm
+from .models import QuizResult
 
 
 def register(request):
@@ -23,18 +27,19 @@ def register(request):
 
 
 def user_login(request):
+    # Login admin: root
+    # Password: admin: root
     if request.method == "POST":
         form = LoginForm(request.POST)
-        return redirect('seven_levels')
-        # if form.is_valid():
-        #     username = form.cleaned_data['username']
-        #     password = form.cleaned_data['password']
-        #     user = authenticate(request, username=username, password=password)
-        #     if user is not None:
-        #         login(request, user)
-        #         return redirect('seven_levels')
-        #     else:
-        #         form.add_error(None, "Неверное имя пользователя или пароль")
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('seven_levels')
+            else:
+                form.add_error(None, "Неверное имя пользователя или пароль")
     else:
         form = LoginForm()
 
@@ -61,8 +66,39 @@ def seven_levels(request):
 def map(request):
     return render(request, 'accounts/map.html')
 
+
 def stage_one_main(request):
     return render(request, 'accounts/stage_one/stage_one_main.html')
 
+
 def stage_one_task(request):
     return render(request, 'accounts/stage_one/stage_one_task.html')
+
+
+@login_required
+@csrf_exempt
+def save_quiz_result(request):
+    # Первый квест!
+    # TODO: Возможность, сохранение наилучшего результата только!
+    if request.method == "POST":
+        data = json.loads(request.body)
+        user = request.user
+        score = data.get("score")
+        step = data.get('step')
+        total_questions = data.get("total_questions")
+
+        quiz_result, created = QuizResult.objects.update_or_create(
+            user=user,
+            step=step,
+            defaults={
+                'score': score,
+                'total_questions': total_questions
+            }
+        )
+
+        if created:
+            message = "Результат сохранён"
+        else:
+            message = "Результат обновлён"
+
+        return JsonResponse({"message": message, "status": "success"})
