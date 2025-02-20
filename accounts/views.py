@@ -66,3 +66,36 @@ def stage_one_main(request):
 
 def stage_one_task(request):
     return render(request, 'accounts/stage_one/stage_one_task.html')
+
+
+def terminal_view(request):
+    output = ""
+    command = ""
+    # Симулируем начальное положение "директории"
+    current_dir = "/"
+
+    if request.method == 'POST':
+        command = request.POST.get('command', '').strip()
+
+        # Обработка базовых команд
+        if command == "pwd":
+            output = current_dir
+        elif command == "ls":
+            # Примерный список каталогов
+            output = "home  var  usr"
+        elif command.startswith("cd "):
+            # Извлекаем путь после "cd "
+            path = command[3:].strip()
+            if path == "/home/student":
+                current_dir = path
+                output = f"Перешли в {current_dir}"
+            else:
+                output = f"Нет такого каталога: {path}"
+        else:
+            output = "Неизвестная команда"
+
+    context = {
+        "output": output,
+        "command": command
+    }
+    return render(request, 'accounts/stage_two/terminal.html', context)
