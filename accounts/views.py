@@ -106,7 +106,8 @@ def terminal_view(request):
         "command": command
     }
     return render(request, 'accounts/stage_two/terminal.html', context)
-=======
+
+
 @login_required
 @csrf_exempt
 def save_quiz_result(request):
@@ -134,4 +135,3 @@ def save_quiz_result(request):
             message = "Результат обновлён"
 
         return JsonResponse({"message": message, "status": "success"})
-
