@@ -1,0 +1,117 @@
+<!-- stage_one_main.html - Главная страница первого этапа -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Этап 1: Знакомство с Astra Linux</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #1e3a8a, #0f1c49);
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            position: relative;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        h1 {
+            font-size: 28px;
+            margin: 10px 0 40px 0;
+        }
+        .info {
+            font-size: 18px;
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+        .highlight {
+            color: #f4d03f;
+            font-weight: bold;
+        }
+        .back {
+            position: absolute; /* Абсолютное позиционирование внутри контейнера */
+            top: 15px; /* Отступ от верхнего края контейнера */
+            left: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back img {
+            width: 40px;
+            height: 40px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #f4d03f;
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #f1c40f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'map' %}" class="back">
+            <img src="{% static 'accounts/img/back.png' %}" alt="Back">
+        </a>
+        <h1>Этап 1: Знакомство с <span class="highlight">историей Astra Linux</span></h1>
+
+        <p class="info">
+            В начале XXI века в России появилась необходимость в собственной операционной системе, которая смогла бы гарантировать высокий уровень защиты данных.
+            Именно тогда была инициирована разработка Astra Linux, первой стабильной версией которой стала система, выпущенная <span class="highlight">спустя три года после 2005</span>.
+            Официально её разработкой занимается компания <span class="highlight">РУСБИТЕХ</span>, специализирующаяся на создании решений для информационной безопасности.
+        </p>
+
+        <p class="info">
+            Одной из главных причин создания Astra Linux было стремление к <span class="highlight">максимальной безопасности</span>. Разработчики системы вложили значительные ресурсы в то, чтобы она соответствовала высоким стандартам защиты информации.
+            В результате Astra Linux получила <span class="highlight">наивысший уровень доверия</span> со стороны государственных структур и прошла сертификацию ФСТЭК, Минобороны РФ и ФСБ.
+        </p>
+
+        <p class="info">
+            Astra Linux базируется на <span class="highlight">Debian</span>, одном из самых стабильных и популярных дистрибутивов Linux. Это позволяет обеспечить высокую производительность, гибкость и совместимость с различными программными решениями.
+            Операционная система поддерживает широкий спектр архитектур, включая x86 и ARM, что делает её удобной для использования как на серверных мощностях, так и на встраиваемых устройствах.
+        </p>
+
+        <p class="info">
+            В отличие от многих других операционных систем, Astra Linux предлагает как коммерческую, так и <span class="highlight">бесплатную</span> версию для пользователей.
+            Базовая версия, известная как "Astra Linux Common Edition", доступна для свободного скачивания и использования, в то время как "Special Edition" предназначена для государственных и корпоративных клиентов, которым требуется расширенный функционал безопасности.
+        </p>
+
+        <p class="info">
+            Несмотря на сложность внедрения, Astra Linux активно используется не только в <span class="highlight">государственных учреждениях</span>, но и в коммерческом секторе.
+            Многие частные компании переходят на эту операционную систему, так как она позволяет обеспечить высокий уровень конфиденциальности данных.
+            В числе пользователей Astra Linux находятся оборонные предприятия, банки, медицинские учреждения и образовательные организации.
+        </p>
+
+        <p class="info">
+            Astra Linux обладает рядом уникальных инструментов для обеспечения безопасности. Например, механизм "Мандатного управления доступом" (МУД) позволяет контролировать доступ пользователей к информации на основе заданных политик безопасности.
+            Это особенно важно для организаций, работающих с конфиденциальными данными.
+        </p>
+
+
+        <a href="{% url 'stage_one_task' %}" class="btn">Перейти к тесту</a>
+    </div>
+
+</body>
+</html>

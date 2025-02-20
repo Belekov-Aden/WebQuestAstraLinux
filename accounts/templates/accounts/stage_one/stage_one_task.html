@@ -20,7 +20,9 @@
             text-align: center;
         }
         .quiz-container {
-            width: 60%;
+            width: 90%; /* Увеличиваем ширину */
+            max-width: 1200px; /* Делаем окно шире */
+            padding: 40px;
             margin: 20px auto;
             background: rgba(255, 255, 255, 0.15);
             padding: 30px;
@@ -30,7 +32,7 @@
             backdrop-filter: blur(10px);
         }
         .question-container {
-            max-height: 300px;
+            max-height: 500px;
             overflow-y: auto;
             padding: 15px;
             border: 2px solid rgba(255, 255, 255, 0.3);
@@ -38,9 +40,26 @@
             margin-bottom: 20px;
             background: rgba(255, 255, 255, 0.1);
         }
+        /* Делаем скролл-бар шире */
+        .question-container::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .question-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+        }
+
+        .question-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .highlight {
+            color: #f4d03f;
+            font-weight: bold;
+        }
         .question {
             padding: 15px;
-            font-size: 20px;
+            font-size: 22px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         }
         .question:last-child {
@@ -85,14 +104,17 @@
             position: absolute;
             top: 10px;
             left: 50px;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 10px 15px;
+            padding: 2px 0 0 0;
             margin: 0 0 0 15px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-            font-weight: bold;
-            font-size: 18px;
+            font-size: 19px;
             cursor: pointer;
+            background: none !important;
+            box-shadow: none !important;
+            border: none !important;
+            transform: scaleX(-1);
+        }
+        .restart i {
+            transform: scaleX(-1);
         }
         .back {
             position: absolute;
@@ -138,7 +160,7 @@
             padding: 10px 20px;
             font-size: 18px;
             font-weight: bold;
-            background: #ffcc00;
+            background: #ffdb4d;
             color: black;
             border: none;
             border-radius: 8px;
@@ -146,16 +168,35 @@
             transition: background 0.3s ease-in-out;
         }
         .win-message button:hover {
-            background: #ffdb4d;
+            background-color: #B8860B;
+        }
+
+        .btn button {
+            background-color:  /* Темно-желтый цвет */
+            color: white; /* Белый текст для контраста */
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn button:hover {
+            background-color: #B8860B; /* Чуть темнее при наведении */
         }
     </style>
 </head>
 <body>
     <div class="quiz-container">
         <div class="score">Правильных: <span id="correct-count">0</span> / 7</div>
-        <a href="main.html" class="back"><img src="{% static 'accounts/img/back.png' %}" alt="Back"></a>
-        <button class="restart" onclick="restartQuiz()"><img src="{% static 'accounts/img/restart.png' %}" alt="Restart"></button>
-        <h2>Тест: Знакомство с Astra-Linux</h2>
+        <a href="{% url 'stage_one_main' %}" class="back">
+            <img src="{% static 'accounts/img/back.png' %}" alt="Back">
+        </a>
+        <button class="restart" onclick="restartQuiz()">
+            <i class="icon fa-solid fa-rotate-left fa-2x"></i>
+        </button>
+        <h1>Знакомство с <span class="highlight">Astra Linux</span></h1>
         <div class="question-container" id="question-container"></div>
         <div class="win-message" id="win-message">
             Поздравляем! Вы успешно прошли испытание!
@@ -168,15 +209,19 @@
             <p id="info-text"></p>
         </div>
     </div>
+
     <script>
-        const questions = [
-            { question: "Когда была создана Astra-Linux?", options: ["2005", "2008", "2012"], answer: "2008", info: "Astra Linux была создана в 2008 году компанией РУСБИТЕХ." },
-            { question: "Какой уровень защиты у Astra-Linux?", options: ["Средний", "Высокий", "Максимальный"], answer: "Максимальный", info: "Astra Linux обладает максимальным уровнем защиты информации." },
-            { question: "Какая организация разработала Astra-Linux?", options: ["РУСБИТЕХ", "Майкрософт", "Canonical"], answer: "РУСБИТЕХ", info: "Astra Linux была разработана компанией РУСБИТЕХ." },
-            { question: "Какое основное преимущество Astra-Linux?", options: ["Открытый исходный код", "Большая база игр", "Простота использования"], answer: "Открытый исходный код", info: "Astra Linux предлагает открытый исходный код и высокий уровень безопасности." },
-            { question: "На основе какой ОС создана Astra-Linux?", options: ["Ubuntu", "Debian", "Windows"], answer: "Debian", info: "Astra Linux основана на Debian." },
-            { question: "Какие организации используют Astra-Linux?", options: ["Частные компании", "Госучреждения", "Обе категории"], answer: "Обе категории", info: "Astra Linux используется как государственными, так и частными организациями." },
-            { question: "Можно ли установить Astra-Linux бесплатно?", options: ["Да", "Нет", "Только по лицензии"], answer: "Да", info: "Базовая версия Astra Linux доступна бесплатно." }
+        const allQuestions = [
+            { question: "Когда была создана Astra Linux?", options: ["2005", "2008", "2012"], answer: "2008", info: "Astra Linux была создана в 2008 году компанией РУСБИТЕХ." },
+            { question: "Какой уровень защиты у Astra Linux?", options: ["Средний", "Высокий", "Максимальный"], answer: "Максимальный", info: "Astra Linux обладает максимальным уровнем защиты информации." },
+            { question: "Какая организация разработала Astra Linux?", options: ["РУСБИТЕХ", "Майкрософт", "Canonical"], answer: "РУСБИТЕХ", info: "Astra Linux была разработана компанией РУСБИТЕХ." },
+            { question: "Какое основное преимущество Astra Linux?", options: ["Открытый исходный код", "Большая база игр", "Простота использования"], answer: "Открытый исходный код", info: "Astra Linux предлагает открытый исходный код и высокий уровень безопасности." },
+            { question: "На основе какой ОС создана Astra Linux?", options: ["Ubuntu", "Debian", "Windows"], answer: "Debian", info: "Astra Linux основана на Debian." },
+            { question: "Какие организации используют Astra Linux?", options: ["Частные компании", "Госучреждения", "Обе категории"], answer: "Обе категории", info: "Astra Linux используется как государственными, так и частными организациями." },
+            { question: "Можно ли установить Astra Linux бесплатно?", options: ["Да", "Нет", "Только по лицензии"], answer: "Да", info: "Базовая версия Astra Linux доступна бесплатно." },
+            { question: "Какая версия Astra Linux предназначена для госструктур?", options: ["Common Edition", "Special Edition", "Home Edition"], answer: "Special Edition", info: "Astra Linux Special Edition предназначена для использования в госструктурах." },
+            { question: "Какой файловый менеджер используется в Astra Linux?", options: ["Dolphin", "Thunar", "Nautilus"], answer: "Dolphin", info: "В Astra Linux используется файловый менеджер Dolphin." },
+            { question: "Какая среда рабочего стола используется в Astra Linux?", options: ["KDE", "GNOME", "Xfce"], answer: "KDE", info: "Astra Linux использует среду рабочего стола KDE." }
         ];
 
         let correctCount = 0;
@@ -186,49 +231,25 @@
         const correctCountSpan = document.getElementById("correct-count");
         const winMessage = document.getElementById("win-message");
 
-        questions.forEach((q, index) => {
-            const div = document.createElement("div");
-            div.classList.add("question");
-            div.innerHTML = `<p>${index + 1}. ${q.question}</p>`;
-            q.options.forEach(option => {
-                const button = document.createElement("button");
-                button.innerText = option;
-                button.onclick = () => {
-                    if (div.querySelector(".correct, .incorrect")) return;
-                    if (option === q.answer) {
-                        button.classList.add("correct");
-                        correctCount++;
-                    } else {
-                        button.classList.add("incorrect");
-                        infoText.innerText = q.info;
-                        infoContainer.style.display = "block";
-                    }
-                    correctCountSpan.innerText = correctCount;
+        function getRandomQuestions() {
+            let shuffled = allQuestions.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 7);
+        }
 
-                    // Проверяем, ответил ли пользователь на все вопросы правильно
-                    if (correctCount === questions.length) {
-                        winMessage.style.display = "block";
-                    }
-                };
-                div.appendChild(button);
-            });
-            questionContainer.appendChild(div);
-        });
-
-        function restartQuiz() {
+        function loadQuestions() {
+            questionContainer.innerHTML = "";
             correctCount = 0;
             correctCountSpan.innerText = correctCount;
             infoContainer.style.display = "none";
-            winMessage.style.display = "none"; // Скрываем окно победы
+            winMessage.style.display = "none";
 
-            // Удаляем старые вопросы
-            questionContainer.innerHTML = "";
+            let selectedQuestions = getRandomQuestions();
 
-            // Пересоздаём вопросы
-            questions.forEach((q, index) => {
+            selectedQuestions.forEach((q, index) => {
                 const div = document.createElement("div");
                 div.classList.add("question");
                 div.innerHTML = `<p>${index + 1}. ${q.question}</p>`;
+
                 q.options.forEach(option => {
                     const button = document.createElement("button");
                     button.innerText = option;
@@ -244,8 +265,7 @@
                         }
                         correctCountSpan.innerText = correctCount;
 
-                        // Проверяем, ответил ли пользователь на все вопросы правильно
-                        if (correctCount === questions.length) {
+                        if (correctCount === 7) {
                             winMessage.style.display = "block";
                         }
                     };
@@ -255,11 +275,13 @@
             });
         }
 
-        loadQuestions();
+        function restartQuiz() {
+            loadQuestions();
+        }
 
+        loadQuestions();
     </script>
-    <script>
-        src="https://kit.fontawesome.com/f6a8e85efb.js" crossorigin="anonymous"
-    </script>
+    <script src="https://kit.fontawesome.com/f6a8e85efb.js" crossorigin="anonymous"></script>
 </body>
+
 </html>
