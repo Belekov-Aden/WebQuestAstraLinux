@@ -10,7 +10,6 @@ urlpatterns = [
     path('stage_one_main/', views.stage_one_main, name='stage_one_main'),
     path('stage_one_task/', views.stage_one_task, name='stage_one_task'),
     path('terminal/', views.terminal_view, name='terminal'),
-    path('stage_three_main/', views.stage_three_main, name='stage_three_main'),
     path('signup/', views.register, name='signup'),
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),

@@ -99,6 +99,3 @@ def terminal_view(request):
         "command": command
     }
     return render(request, 'accounts/stage_two/terminal.html', context)
-
-def stage_three_main(request):
-    return render(request, 'accounts/stage_three/stage_three_main.html')
