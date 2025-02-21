@@ -1,0 +1,301 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Интерактивная лупа Astra-Linux</title>
+  <style>
+    /* ===== ГЛОБАЛЬНЫЕ СТИЛИ ===== */
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #1e3a8a, #0f1c49);
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .container {
+      position: relative;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 80px 20px 20px; /* Отступ сверху 80px, чтобы кнопка "Назад" не закрывала */
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    /* ===== БЛОК С ТЕКСТОМ ===== */
+    .text-wrapper {
+      width: 800px;
+      margin: 0 auto;
+      text-align: justify;
+      /* Вместо margin-top у .tiny-text — сделаем padding-top у .text-wrapper */
+    }
+
+    /* Мелкий текст: убираем margin-top */
+    .tiny-text {
+      font-size: 8px;
+      line-height: 1.3;
+      margin-top: 0px;
+      color: white;
+    }
+    .magnifier {
+      background: #0f1c49; /* или другой цвет, схожий с задним фоном */
+    }
+
+    /* Кнопки и иконки */
+    .back {
+      position: absolute;
+      top: 15px;
+      left: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .back img {
+      width: 40px;
+      height: 40px;
+    }
+    .magnifier-toggle {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 999;
+    }
+    .magnifier-toggle img {
+      width: 40px;
+      height: 40px;
+    }
+
+    /* ===== ЛУПА ===== */
+    .magnifier {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border: 3px solid #000;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      pointer-events: none;
+      overflow: hidden;
+      display: none;
+      background: #1a2f60;
+      z-index: 9999;
+    }
+    .magnifier-content {
+      position: absolute;
+      transform: scale(2);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .text-wrapper-clone {
+      width: 800px;
+      margin: 0 auto;
+      text-align: justify;
+      font-size: 8px;
+      line-height: 1.3;
+      color: white;
+    }
+
+    .keyword-highlight {
+      color: #f4d03f;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+      transform: scale(1.2);
+      display: inline-block;
+    }
+
+    /* ===== МОДАЛЬНОЕ ОКНО ===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .modal-content {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      text-align: center;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+    }
+    .close-modal-btn {
+      margin-top: 20px;
+      background: #1e3a8a;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .close-modal-btn:hover {
+      background: #0f1c49;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content">
+    <h2>Добро пожаловать на новый этап квеста!</h2>
+    <p>Перед вами будет очень мелкий текст.
+       Нажмите «Продолжить», чтобы приступить, а затем используйте лупу (иконка в правом верхнем углу)
+       для прочтения текста и поиска ключевого слова.</p>
+    <button class="close-modal-btn" id="closeModalBtn">Продолжить</button>
+  </div>
+</div>
+
+<!-- Основной контейнер -->
+<div class="container" id="outerContainer" style="visibility: hidden;">
+  <a href="{% url 'map' %}" class="back">
+    <img src="{% static 'accounts/img/back.png' %}" alt="Back">
+  </a>
+
+  <button class="magnifier-toggle" id="magnifierToggle">
+    <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Лупа">
+  </button>
+
+  <!-- Блок с текстом -->
+  <div class="text-wrapper" id="originalWrapper">
+    <p class="tiny-text" id="originalText">
+      Это пример заметки об Astra‑Linux. Внимательно изучите текст, чтобы обнаружить скрытую подсказку.
+      Например, слово <span id="keyword">Astra</span> является ключевым и будет использовано в дальнейшем квесте.
+      <br><br>
+      Тут может быть ещё несколько строк мелкого текста,
+      чтобы пользователь действительно не смог прочесть его без лупы.
+      При наведении лупы вы должны видеть ровно тот фрагмент,
+      который скрывается в этой области.
+    </p>
+  </div>
+</div>
+
+<!-- Лупа -->
+<div class="magnifier" id="magnifier">
+  <div class="magnifier-content" id="magnifierContent">
+    <div class="text-wrapper-clone" id="cloneWrapper">
+      <p class="tiny-text">
+        Это пример заметки об Astra‑Linux. Внимательно изучите текст, чтобы обнаружить скрытую подсказку.
+        Например, слово <span id="keywordClone">Astra</span> является ключевым и будет использовано в дальнейшем квесте.
+        <br><br>
+        Тут может быть ещё несколько строк мелкого текста,
+        чтобы пользователь действительно не смог прочесть его без лупы.
+        При наведении лупы вы должны видеть ровно тот фрагмент,
+        который скрывается в этой области.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* Ссылки на элементы */
+  const modalOverlay     = document.getElementById('modalOverlay');
+  const closeModalBtn    = document.getElementById('closeModalBtn');
+  const outerContainer   = document.getElementById('outerContainer');
+  const textWrapper      = document.getElementById('originalWrapper');
+  const magnifierToggle  = document.getElementById('magnifierToggle');
+  const magnifier        = document.getElementById('magnifier');
+  const magnifierContent = document.getElementById('magnifierContent');
+
+  const keyword      = document.getElementById('keyword');
+  const keywordClone = document.getElementById('keywordClone');
+
+  let magnifierActive = false;
+
+  // Закрываем модалку
+  closeModalBtn.addEventListener('click', function() {
+    modalOverlay.style.display = 'none';
+    outerContainer.style.visibility = 'visible';
+  });
+
+  // Включение/выключение лупы
+  magnifierToggle.addEventListener('click', function() {
+    magnifierActive = !magnifierActive;
+    if (magnifierActive) {
+      textWrapper.addEventListener('mousemove', handleMouseMove);
+      textWrapper.addEventListener('mouseleave', handleMouseLeave);
+    } else {
+      textWrapper.removeEventListener('mousemove', handleMouseMove);
+      textWrapper.removeEventListener('mouseleave', handleMouseLeave);
+      magnifier.style.display = 'none';
+      removeKeywordHighlight();
+    }
+  });
+
+  function handleMouseMove(e) {
+    const rect = textWrapper.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    magnifier.style.display = 'block';
+
+    const mW = magnifier.offsetWidth;
+    const mH = magnifier.offsetHeight;
+
+    // Лупа идёт за курсором по экрану
+    magnifier.style.left = (e.clientX - mW / 2) + 'px';
+    magnifier.style.top  = (e.clientY - mH / 2) + 'px';
+
+    // Содержимое внутри лупы смещаем согласно масштабу
+    magnifierContent.style.left = (-(x * 2) + mW / 2) + 'px';
+    magnifierContent.style.top  = (-(y * 2) + mH / 2) + 'px';
+
+    highlightKeywordIfNeeded(x, y);
+  }
+
+  function handleMouseLeave() {
+    magnifier.style.display = 'none';
+    removeKeywordHighlight();
+  }
+
+  function highlightKeywordIfNeeded(x, y) {
+    const keywordRect = keyword.getBoundingClientRect();
+    const textRect    = textWrapper.getBoundingClientRect();
+
+    const kwLeft   = keywordRect.left - textRect.left;
+    const kwTop    = keywordRect.top  - textRect.top;
+    const kwRight  = kwLeft + keywordRect.width;
+    const kwBottom = kwTop  + keywordRect.height;
+
+    if (x > kwLeft && x < kwRight && y > kwTop && y < kwBottom) {
+      keyword.classList.add('keyword-highlight');
+      keywordClone.classList.add('keyword-highlight');
+    } else {
+      removeKeywordHighlight();
+    }
+  }
+
+  function removeKeywordHighlight() {
+    keyword.classList.remove('keyword-highlight');
+    keywordClone.classList.remove('keyword-highlight');
+  }
+
+  keyword.addEventListener('click', function() {
+    alert('Подсказка найдена! Переходим к следующему этапу квеста.');
+  });
+  keywordClone.addEventListener('click', function() {
+    alert('Подсказка найдена! Переходим к следующему этапу квеста.');
+  });
+</script>
+</body>
+</html>
