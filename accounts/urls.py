@@ -11,6 +11,7 @@ urlpatterns = [
     path('stage_one_task/', views.stage_one_task, name='stage_one_task'),
     path('terminal/', views.terminal_view, name='terminal'),
     path("save_quiz_result_one/", views.save_quiz_result, name="save_quiz_result"),
+    path('save_quiz_result_two/', views.save_quiz_result_two, name='save_quiz_result_two'),
     path('signup/', views.register, name='signup'),
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),

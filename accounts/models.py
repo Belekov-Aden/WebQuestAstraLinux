@@ -12,7 +12,7 @@ class QuizResult(models.Model):
         ]
     )
     score = models.IntegerField()
-    total_questions = models.IntegerField()
+    total_questions = models.IntegerField(null=True)
     date_taken = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
