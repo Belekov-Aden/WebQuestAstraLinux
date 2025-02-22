@@ -2,415 +2,466 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Интерактивный терминал</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: #0f0;
-      font-family: monospace;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal {
-      background: #111;
-      border: 1px solid #0f0;
-      padding: 30px;
-      text-align: center;
-      max-width: 500px;
-      color: #0f0;
-      font-size: 18px;
-    }
-    .modal p {
-      margin-bottom: 20px;
-    }
-    .pill-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-    .pill-button {
-      border: none;
-      padding: 10px 20px;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    .blue-pill { background: blue; }
-    .red-pill { background: red; }
-    .green-pill { background: #00f000; }
+    <meta charset="UTF-8">
+    <title>Интерактивный терминал</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-    .terminal-container {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .terminal {
-      border: 1px solid #0f0;
-      padding: 20px;
-      background: #000;
-      min-height: 400px;
-      position: relative;
-    }
-    .input-line {
-      display: flex;
-      align-items: center;
-    }
-    .prompt {
-      margin-right: 5px;
-    }
-    .terminal-input {
-      background: transparent;
-      border: none;
-      color: #0f0;
-      font-size: 16px;
-      flex: 1;
-    }
-    .terminal-input:focus { outline: none; }
-    .output {
-      white-space: pre-wrap;
-      margin-bottom: 10px;
-    }
-    .tasks {
-      width: 300px;
-      border-left: 1px solid #0f0;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .tasks h2 { margin-top: 0; }
-    .task { margin-bottom: 20px; }
-    .task.active {
-      font-weight: bold;
-      color: #ff0;
-    }
-    .congrats {
-      color: #ff0;
-      font-weight: bold;
-    }
-  </style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: #111;
+            border: 1px solid #0f0;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            color: #0f0;
+            font-size: 18px;
+        }
+
+        .modal p {
+            margin-bottom: 20px;
+        }
+
+        .pill-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pill-button {
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .blue-pill {
+            background: blue;
+        }
+
+        .red-pill {
+            background: red;
+        }
+
+        .green-pill {
+            background: #00f000;
+        }
+
+        .terminal-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .terminal {
+            border: 1px solid #0f0;
+            padding: 20px;
+            background: #000;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            margin-right: 5px;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .terminal-input:focus {
+            outline: none;
+        }
+
+        .output {
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+
+        .tasks {
+            width: 300px;
+            border-left: 1px solid #0f0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tasks h2 {
+            margin-top: 0;
+        }
+
+        .task {
+            margin-bottom: 20px;
+        }
+
+        .task.active {
+            font-weight: bold;
+            color: #ff0;
+        }
+
+        .congrats {
+            color: #ff0;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
 <!-- Модальное окно выбора таблетки -->
 <div id="modal-overlay" class="modal-overlay">
-  <div class="modal">
-    <p>"Примешь синюю таблетку, и сказке конец, проснёшься в своей постели и поверишь в то, во что хочешь верить. Примешь красную таблетку — останешься в Стране чудес, и я покажу тебе, насколько глубока кроличья нора".</p>
-      <p>Помни: назад дороги нет!</p>
-    <div class="pill-buttons">
-      <button id="blue-pill" class="pill-button blue-pill">Синяя таблетка (вернуться на карту)</button>
-      <button id="red-pill" class="pill-button red-pill">Красная таблетка (начать игру)</button>
+    <div class="modal">
+        <p>"Примешь синюю таблетку, и сказке конец, проснёшься в своей постели и поверишь в то, во что хочешь верить.
+            Примешь красную таблетку — останешься в Стране чудес, и я покажу тебе, насколько глубока кроличья нора".</p>
+        <p>Помни: назад дороги нет!</p>
+        <div class="pill-buttons">
+            <button id="blue-pill" class="pill-button blue-pill">Синяя таблетка (вернуться на карту)</button>
+            <button id="red-pill" class="pill-button red-pill">Красная таблетка (начать игру)</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Модальное окно проигрыша -->
 <div id="lose-overlay" class="modal-overlay" style="display:none;">
-  <div class="modal">
-    <p>У вас закончились попытки. Вы проиграли!</p>
-    <button id="lose-exit" class="pill-button green-pill">Выход</button>
-  </div>
+    <div class="modal">
+        <p>У вас закончились попытки. Вы проиграли!</p>
+        <button id="lose-exit" class="pill-button green-pill">Выход</button>
+    </div>
 </div>
 
 <!-- Модальное окно победы (новое) -->
 <div id="win-overlay" class="modal-overlay" style="display:none;">
-  <div class="modal">
-    <p>Поздравляем!!! Ты прошел второй этап, твоя награда - «Токен Командной Строки», подтверждает освоение базового функционала терминала</p>
-    <div class="pill-buttons">
-      <button id="win-exit" class="pill-button green-pill">Вперед</button>
+    <div class="modal">
+        <p>Поздравляем!!! Ты прошел второй этап, твоя награда - «Токен Командной Строки», подтверждает освоение базового
+            функционала терминала</p>
+        <div class="pill-buttons">
+            <button id="win-exit" class="pill-button green-pill">Вперед</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="terminal-container">
-  <div id="terminal" class="terminal">
-    <div id="terminal-output"></div>
-    <div class="input-line">
-      <span id="prompt" class="prompt">C:/ $</span>
-      <input type="text" id="terminal-input" class="terminal-input" autofocus>
+    <div id="terminal" class="terminal">
+        <div id="terminal-output"></div>
+        <div class="input-line">
+            <span id="prompt" class="prompt">C:/ $</span>
+            <input type="text" id="terminal-input" class="terminal-input" autofocus>
+        </div>
     </div>
-  </div>
 </div>
 <div class="tasks">
-  <h2>Задания</h2>
-  <div id="task-container"></div>
+    <h2>Задания</h2>
+    <div id="task-container"></div>
 </div>
 
 <script>
-  // Кнопки выбора
-  document.getElementById('blue-pill').addEventListener('click', function() {
-    window.location.href = "{% url 'map' %}";
-  });
-  document.getElementById('red-pill').addEventListener('click', function() {
-    document.getElementById('modal-overlay').style.display = 'none';
-    document.getElementById("terminal-input").focus();
-  });
+    function sendCompletionStatus() {
+        fetch("/save_quiz_result_two/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({completed: true, step: 2})
+        })
+            .then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error("Ошибка:", error));
+    }
 
-  // Модальное окно проигрыша
-  function showLoseModal() {
-    document.getElementById('lose-overlay').style.display = 'flex';
-  }
-  document.getElementById('lose-exit').addEventListener('click', function() {
-    window.location.href = "{% url 'map' %}";
-  });
-
-  // Модальное окно победы
-  function showWinModal() {
-    document.getElementById('win-overlay').style.display = 'flex';
-  }
-  document.getElementById('win-exit').addEventListener('click', function() {
-    window.location.href = "{% url 'map' %}";
-  });
-
-
-
-  // Файловая система
-  const fileSystem = {
-    "C:/": ["home", "var", "settings"],
-    "C:/home": ["students"],
-    "C:/home/students": [],
-    "C:/settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
-    "C:/var": []
-  };
-
-  let currentDir = "C:/";
-
-  function updatePrompt() {
-    document.getElementById("prompt").textContent = currentDir + " $";
-  }
-  updatePrompt();
-
-  // Задания
-  const tasks = [
-    { description: "Задание 1: Перейдите в каталог C:/home/students (команда: cd home/students)", commands: ["cd home/students"] },
-    { description: "Задание 2: Вернитесь в корневой каталог (команда: cd /)", commands: ["cd /"] },
-    { description: "Задание 3: Посмотрите содержимое каталога (команда: ls)", commands: ["ls"] },
-    { description: "Задание 4: Перейдите в каталог var и создайте папку job (команды: cd var, mkdir job)", commands: ["cd var", "mkdir job"] },
-    { description: "Задание 5: Просмотрите содержимое каталога var (команда: ls)", commands: ["ls"] }
-  ];
-
-  const finalTask = {
-    description: "Финальное задание: Перейдите в каталог C:/home/students, создайте папки main и work, проверьте их наличие и вернитесь в корневой каталог.",
-    commands: ["cd home/students", "mkdir main", "mkdir work", "ls", "cd /"]
-  };
-
-  let currentTaskIndex = 0;
-  let currentCommandIndex = 0;
-  let finalMode = false;
-  let currentFinalCommandIndex = 0;
-  let finalAttempts = 2;
-
-  function renderTasks() {
-    const container = document.getElementById("task-container");
-    container.innerHTML = "";
-    tasks.forEach((task, index) => {
-      let div = document.createElement("div");
-      if (index === currentTaskIndex) {
-        div.className = "task active";
-        div.textContent = task.description;
-      } else {
-        div.className = "task";
-        div.textContent = task.description;
-      }
-      container.appendChild(div);
+    // Кнопки выбора
+    document.getElementById('blue-pill').addEventListener('click', function () {
+        window.location.href = "{% url 'map' %}";
     });
-  }
+    document.getElementById('red-pill').addEventListener('click', function () {
+        document.getElementById('modal-overlay').style.display = 'none';
+        document.getElementById("terminal-input").focus();
+    });
 
-  function renderFinalTask() {
-    const container = document.getElementById("task-container");
-    container.innerHTML = "";
-    let div = document.createElement("div");
-    div.className = "task active";
-    div.textContent = finalTask.description;
-    container.appendChild(div);
-
-    let attemptsDiv = document.createElement("div");
-    attemptsDiv.id = "final-attempts";
-    attemptsDiv.textContent = "Попыток осталось: " + finalAttempts;
-    container.appendChild(attemptsDiv);
-  }
-
-  renderTasks();
-
-  function appendOutput(text, cssClass = "") {
-    const outputDiv = document.getElementById("terminal-output");
-    let line = document.createElement("div");
-    line.className = "output " + cssClass;
-    line.textContent = text;
-    outputDiv.appendChild(line);
-    const terminal = document.getElementById("terminal");
-    terminal.scrollTop = terminal.scrollHeight;
-  }
-
-  // Симуляция команд
-  function executeCommand(cmd) {
-    cmd = cmd.trim();
-    if (cmd.toLowerCase() === "pwd") {
-      return currentDir;
-    }
-    else if (cmd.toLowerCase().startsWith("ls")) {
-      let parts = cmd.split(" ");
-      let targetDir = parts.length > 1 ? parts[1].trim() : currentDir;
-      if (targetDir === "") targetDir = currentDir;
-      if (fileSystem[targetDir] !== undefined) {
-        return fileSystem[targetDir].join("  ");
-      } else if (targetDir === currentDir) {
-        return fileSystem[currentDir].join("  ");
-      } else {
-        return "Нет такого каталога: " + targetDir;
-      }
-    }
-    else if (cmd.toLowerCase().startsWith("cd ")) {
-      let newDir = cmd.slice(3).trim();
-      if (newDir === "/") {
-        currentDir = "C:/";
-        updatePrompt();
-        return "";
-      }
-      if (!newDir.startsWith("C:/")) {
-        if (currentDir.endsWith("/")) {
-          newDir = currentDir + newDir;
-        } else {
-          newDir = currentDir + "/" + newDir;
-        }
-      }
-      if (fileSystem[newDir] !== undefined) {
-        currentDir = newDir;
-        updatePrompt();
-        // Пасхалка: если зашли в C:/settings, выводим содержимое
-        if (newDir === "C:/settings") {
-          return fileSystem[newDir].join("  ");
-        }
-        return "";
-      } else {
-        return "Нет такого каталога: " + newDir;
-      }
-    }
-    else if (cmd.toLowerCase().startsWith("mkdir ")) {
-      let folderName = cmd.slice(6).trim();
-      let newDir;
-      if (currentDir.endsWith("/")) {
-        newDir = currentDir + folderName;
-      } else {
-        newDir = currentDir + "/" + folderName;
-      }
-      if (fileSystem[currentDir].includes(folderName)) {
-        return "Папка уже существует: " + folderName;
-      } else {
-        fileSystem[currentDir].push(folderName);
-        fileSystem[newDir] = [];
-        return "";
-      }
-    }
-    else {
-      return "Команда не найдена";
-    }
-  }
-
-  function processCommand(command) {
-    command = command.trim();
-    if (!command) return;
-    appendOutput(document.getElementById("prompt").textContent + " " + command);
-
-    const simOutput = executeCommand(command);
-    if (simOutput) {
-      appendOutput(simOutput);
+    // Модальное окно проигрыша
+    function showLoseModal() {
+        document.getElementById('lose-overlay').style.display = 'flex';
     }
 
-    if (!finalMode) {
-      // Проверка базовых заданий
-      const expected = tasks[currentTaskIndex].commands[currentCommandIndex];
-      // Доп. проверка для задания 4 (mkdir job) - пользователь должен быть в C:/var
-      if (currentTaskIndex === 3 && currentCommandIndex === 1 && currentDir !== "C:/var") {
-        appendOutput("Вы не находитесь в каталоге var. Сначала перейдите в каталог var.", "congrats");
-        return;
-      }
+    document.getElementById('lose-exit').addEventListener('click', function () {
+        window.location.href = "{% url 'map' %}";
+    });
 
-      if (command.toLowerCase() === expected.toLowerCase()) {
-        appendOutput("Поздравляем! Команда выполнена!", "congrats");
-        currentCommandIndex++;
-        if (currentCommandIndex >= tasks[currentTaskIndex].commands.length) {
-          // Завершили текущее задание
-          currentTaskIndex++;
-          currentCommandIndex = 0;
-          if (currentTaskIndex < tasks.length) {
-            setTimeout(() => {
-              appendOutput("Следующее задание:", "congrats");
-              renderTasks();
-            }, 1000);
-          } else {
-            // Все базовые задания выполнены
-            setTimeout(() => {
-              appendOutput("Поздравляем, вы выполнили все базовые задания!", "congrats");
-              // Дадим 1.5 секунды на прочтение, потом очистим терминал
-              setTimeout(() => {
-                document.getElementById('terminal-output').innerHTML = '';
-                finalMode = true;
-                currentFinalCommandIndex = 0;
-                finalAttempts = 2;
-                // Автоматически перемещаемся в корень
+    // Модальное окно победы
+    function showWinModal() {
+        document.getElementById('win-overlay').style.display = 'flex';
+    }
+
+    document.getElementById('win-exit').addEventListener('click', function () {
+        window.location.href = "{% url 'map' %}";
+    });
+
+
+    // Файловая система
+    const fileSystem = {
+        "C:/": ["home", "var", "settings"],
+        "C:/home": ["students"],
+        "C:/home/students": [],
+        "C:/settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
+        "C:/var": []
+    };
+
+    let currentDir = "C:/";
+
+    function updatePrompt() {
+        document.getElementById("prompt").textContent = currentDir + " $";
+    }
+
+    updatePrompt();
+
+    // Задания
+    const tasks = [
+        {
+            description: "Задание 1: Перейдите в каталог C:/home/students (команда: cd home/students)",
+            commands: ["cd home/students"]
+        },
+        {description: "Задание 2: Вернитесь в корневой каталог (команда: cd /)", commands: ["cd /"]},
+        {description: "Задание 3: Посмотрите содержимое каталога (команда: ls)", commands: ["ls"]},
+        {
+            description: "Задание 4: Перейдите в каталог var и создайте папку job (команды: cd var, mkdir job)",
+            commands: ["cd var", "mkdir job"]
+        },
+        {description: "Задание 5: Просмотрите содержимое каталога var (команда: ls)", commands: ["ls"]}
+    ];
+
+    const finalTask = {
+        description: "Финальное задание: Перейдите в каталог C:/home/students, создайте папки main и work, проверьте их наличие и вернитесь в корневой каталог.",
+        commands: ["cd home/students", "mkdir main", "mkdir work", "ls", "cd /"]
+    };
+
+    let currentTaskIndex = 0;
+    let currentCommandIndex = 0;
+    let finalMode = false;
+    let currentFinalCommandIndex = 0;
+    let finalAttempts = 2;
+
+    function renderTasks() {
+        const container = document.getElementById("task-container");
+        container.innerHTML = "";
+        tasks.forEach((task, index) => {
+            let div = document.createElement("div");
+            if (index === currentTaskIndex) {
+                div.className = "task active";
+                div.textContent = task.description;
+            } else {
+                div.className = "task";
+                div.textContent = task.description;
+            }
+            container.appendChild(div);
+        });
+    }
+
+    function renderFinalTask() {
+        const container = document.getElementById("task-container");
+        container.innerHTML = "";
+        let div = document.createElement("div");
+        div.className = "task active";
+        div.textContent = finalTask.description;
+        container.appendChild(div);
+
+        let attemptsDiv = document.createElement("div");
+        attemptsDiv.id = "final-attempts";
+        attemptsDiv.textContent = "Попыток осталось: " + finalAttempts;
+        container.appendChild(attemptsDiv);
+    }
+
+    renderTasks();
+
+    function appendOutput(text, cssClass = "") {
+        const outputDiv = document.getElementById("terminal-output");
+        let line = document.createElement("div");
+        line.className = "output " + cssClass;
+        line.textContent = text;
+        outputDiv.appendChild(line);
+        const terminal = document.getElementById("terminal");
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    // Симуляция команд
+    function executeCommand(cmd) {
+        cmd = cmd.trim();
+        if (cmd.toLowerCase() === "pwd") {
+            return currentDir;
+        } else if (cmd.toLowerCase().startsWith("ls")) {
+            let parts = cmd.split(" ");
+            let targetDir = parts.length > 1 ? parts[1].trim() : currentDir;
+            if (targetDir === "") targetDir = currentDir;
+            if (fileSystem[targetDir] !== undefined) {
+                return fileSystem[targetDir].join("  ");
+            } else if (targetDir === currentDir) {
+                return fileSystem[currentDir].join("  ");
+            } else {
+                return "Нет такого каталога: " + targetDir;
+            }
+        } else if (cmd.toLowerCase().startsWith("cd ")) {
+            let newDir = cmd.slice(3).trim();
+            if (newDir === "/") {
                 currentDir = "C:/";
                 updatePrompt();
-                renderFinalTask();
-              }, 1500);
-            }, 1000);
-          }
+                return "";
+            }
+            if (!newDir.startsWith("C:/")) {
+                if (currentDir.endsWith("/")) {
+                    newDir = currentDir + newDir;
+                } else {
+                    newDir = currentDir + "/" + newDir;
+                }
+            }
+            if (fileSystem[newDir] !== undefined) {
+                currentDir = newDir;
+                updatePrompt();
+                // Пасхалка: если зашли в C:/settings, выводим содержимое
+                if (newDir === "C:/settings") {
+                    return fileSystem[newDir].join("  ");
+                }
+                return "";
+            } else {
+                return "Нет такого каталога: " + newDir;
+            }
+        } else if (cmd.toLowerCase().startsWith("mkdir ")) {
+            let folderName = cmd.slice(6).trim();
+            let newDir;
+            if (currentDir.endsWith("/")) {
+                newDir = currentDir + folderName;
+            } else {
+                newDir = currentDir + "/" + folderName;
+            }
+            if (fileSystem[currentDir].includes(folderName)) {
+                return "Папка уже существует: " + folderName;
+            } else {
+                fileSystem[currentDir].push(folderName);
+                fileSystem[newDir] = [];
+                return "";
+            }
         } else {
-          renderTasks();
+            return "Команда не найдена";
         }
-      } else {
-        appendOutput("Неверная команда. Попробуйте ещё раз.");
-      }
-    } else {
-      // Финальный режим
-      const expected = finalTask.commands[currentFinalCommandIndex];
-      if (command.toLowerCase() === expected.toLowerCase()) {
-        appendOutput("Поздравляем! Команда выполнена!", "congrats");
-        currentFinalCommandIndex++;
-        if (currentFinalCommandIndex >= finalTask.commands.length) {
-          // ВСЕ финальные команды выполнены
-          appendOutput("Поздравляем! Вы успешно выполнили финальное задание!");
-          // Вместо простого вывода - показываем окно победы
-          showWinModal();
-        } else {
-          renderFinalTask();
-        }
-      } else {
-        finalAttempts--;
-        if (finalAttempts > 0) {
-          appendOutput("Неверная команда. Попыток осталось: " + finalAttempts);
-          document.getElementById("final-attempts").textContent = "Попыток осталось: " + finalAttempts;
-        } else {
-          appendOutput("Вы не справились с финальным заданием. Игра окончена.");
-          finalAttempts = 0;
-          showLoseModal(); // Показываем окно проигрыша
-        }
-      }
     }
-  }
 
-  document.getElementById("terminal-input").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      processCommand(this.value);
-      this.value = "";
+    function processCommand(command) {
+        command = command.trim();
+        if (!command) return;
+        appendOutput(document.getElementById("prompt").textContent + " " + command);
+
+        const simOutput = executeCommand(command);
+        if (simOutput) {
+            appendOutput(simOutput);
+        }
+
+        if (!finalMode) {
+            // Проверка базовых заданий
+            const expected = tasks[currentTaskIndex].commands[currentCommandIndex];
+            // Доп. проверка для задания 4 (mkdir job) - пользователь должен быть в C:/var
+            if (currentTaskIndex === 3 && currentCommandIndex === 1 && currentDir !== "C:/var") {
+                appendOutput("Вы не находитесь в каталоге var. Сначала перейдите в каталог var.", "congrats");
+                return;
+            }
+
+            if (command.toLowerCase() === expected.toLowerCase()) {
+                appendOutput("Поздравляем! Команда выполнена!", "congrats");
+                currentCommandIndex++;
+                if (currentCommandIndex >= tasks[currentTaskIndex].commands.length) {
+                    // Завершили текущее задание
+                    currentTaskIndex++;
+                    currentCommandIndex = 0;
+                    if (currentTaskIndex < tasks.length) {
+                        setTimeout(() => {
+                            appendOutput("Следующее задание:", "congrats");
+                            renderTasks();
+                        }, 1000);
+                    } else {
+                        // Все базовые задания выполнены
+                        setTimeout(() => {
+                            appendOutput("Поздравляем, вы выполнили все базовые задания!", "congrats");
+                            // Дадим 1.5 секунды на прочтение, потом очистим терминал
+                            setTimeout(() => {
+                                document.getElementById('terminal-output').innerHTML = '';
+                                finalMode = true;
+                                currentFinalCommandIndex = 0;
+                                finalAttempts = 2;
+                                // Автоматически перемещаемся в корень
+                                currentDir = "C:/";
+                                updatePrompt();
+                                renderFinalTask();
+                            }, 1500);
+                        }, 1000);
+                    }
+                } else {
+                    renderTasks();
+                }
+            } else {
+                appendOutput("Неверная команда. Попробуйте ещё раз.");
+            }
+        } else {
+            // Финальный режим
+            const expected = finalTask.commands[currentFinalCommandIndex];
+            if (command.toLowerCase() === expected.toLowerCase()) {
+                appendOutput("Поздравляем! Команда выполнена!", "congrats");
+                currentFinalCommandIndex++;
+                if (currentFinalCommandIndex >= finalTask.commands.length) {
+                    // ВСЕ финальные команды выполнены
+                    appendOutput("Поздравляем! Вы успешно выполнили финальное задание!");
+                    // Вместо простого вывода - показываем окно победы
+                    sendCompletionStatus();
+                    showWinModal();
+                } else {
+                    renderFinalTask();
+                }
+            } else {
+                finalAttempts--;
+                if (finalAttempts > 0) {
+                    appendOutput("Неверная команда. Попыток осталось: " + finalAttempts);
+                    document.getElementById("final-attempts").textContent = "Попыток осталось: " + finalAttempts;
+                } else {
+                    appendOutput("Вы не справились с финальным заданием. Игра окончена.");
+                    finalAttempts = 0;
+                    showLoseModal(); // Показываем окно проигрыша
+                }
+            }
+        }
     }
-  });
+
+    document.getElementById("terminal-input").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            processCommand(this.value);
+            this.value = "";
+        }
+    });
 </script>
 </body>
 </html>
