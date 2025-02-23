@@ -1,6 +1,6 @@
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db.models.fields import json
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -155,17 +155,17 @@ def save_quiz_result_two(request):
         completed = data.get('completed')
         step = data.get('step')
 
-        quiz_result, created = QuizResult.objects.update_or_create(
-            user=user,
-            step=step,
-            defaults={
-                'score': completed,
-            }
-        )
+        if QuizResult.objects.filter(user=user, step=step).exists():
+            quiz_result = QuizResult.objects.filter(user=user, step=step).first()
+            quiz_result.score = completed
+            quiz_result.save()
+            message = "Результат обновлён"
+        else:
+            QuizResult.objects.create(
+                user=user,
+                step=step,
+                score=completed,
+            )
+            message = "Результат сохранён"
 
-    if created:
-        message = "Результат сохранён"
-    else:
-        message = "Результат обновлён"
-
-    return JsonResponse({"message": message, "status": "success"})
+        return JsonResponse({"message": message, "status": "success"})
