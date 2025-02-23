@@ -3,297 +3,730 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Интерактивная лупа Astra-Linux</title>
+  <title>Рабочий стол Astra Linux – Задания, диалоги и создание предметов</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #1e3a8a, #0f1c49);
-      color: white;
+    /* Сброс базовых отступов */
+    * {
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
+      box-sizing: border-box;
+    }
+
+    /* Фон рабочего стола */
+    body {
+      font-family: Arial, sans-serif;
+      background: url("{% static 'accounts/img/os-astra-linux.jpg' %}") no-repeat center center fixed;
+      background-size: cover;
       overflow: hidden;
     }
 
-    .container {
+    /* Верхняя панель */
+    .top-panel {
       position: relative;
-      max-width: 900px;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 80px 20px 20px; /* Отступ сверху 80px, чтобы кнопка "Назад" не закрывала */
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    }
-
-    .text-wrapper {
-      width: 800px;
-      margin: 0 auto;
-      text-align: justify;
-      /* Вместо margin-top у .tiny-text — сделаем padding-top у .text-wrapper */
-    }
-
-    /* Мелкий текст: убираем margin-top */
-    .tiny-text {
-      font-size: 8px;
-      line-height: 1.3;
-      margin-top: 0px;
-      color: white;
-    }
-    .magnifier {
-      background: #0f1c49; /* или другой цвет, схожий с задним фоном */
-    }
-
-    /* Кнопки и иконки */
-    .back {
-      position: absolute;
-      top: 15px;
-      left: 10px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-    .back img {
-      width: 40px;
-      height: 40px;
-    }
-    .magnifier-toggle {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      z-index: 999;
-    }
-    .magnifier-toggle img {
-      width: 40px;
-      height: 40px;
-    }
-
-    /* ===== ЛУПА ===== */
-    .magnifier {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      border: 3px solid #000;
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      pointer-events: none;
-      overflow: hidden;
-      display: none;
-      background: #1a2f60;
-      z-index: 9999;
-    }
-    .magnifier-content {
-      position: absolute;
-      transform: scale(2);
-      transform-origin: top left;
-      pointer-events: none;
-    }
-
-    .text-wrapper-clone {
-      width: 800px;
-      margin: 0 auto;
-      text-align: justify;
-      font-size: 8px;
-      line-height: 1.3;
-      color: white;
-    }
-
-    .keyword-highlight {
-      color: #f4d03f;
-      font-weight: bold;
-      transition: transform 0.2s ease;
-      transform: scale(1.2);
-      display: inline-block;
-    }
-
-    /* ===== МОДАЛЬНОЕ ОКНО ===== */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
       width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
+      height: 40px;
+      background: rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
-      justify-content: center;
-      z-index: 99999;
+      justify-content: space-between;
+      padding: 0 10px;
     }
-    .modal-content {
+    .top-panel .panel-left {
+      color: #fff;
+      font-size: 14px;
+    }
+    .top-panel .panel-right a.back img {
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+
+    /* Рабочий стол */
+    .desktop {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 20px;
+      overflow: auto;
+    }
+
+    /* Иконки на рабочем столе */
+    .icon {
+      width: 80px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      margin: 10px;
+      float: left;
+      border: 2px solid transparent;
+      border-radius: 5px;
+    }
+    .icon img {
+      display: block;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+    }
+    .icon span {
+      display: block;
+      margin-top: 4px;
+      color: #fff;
+      font-size: 14px;
+      text-shadow: 0 0 3px rgba(0,0,0,0.7);
+    }
+    .icon.selected {
+      border: 2px solid #f4d03f;
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* ===== Меню рабочего стола (#desktopMenu) ===== */
+    #desktopMenu {
+      position: absolute;
+      display: none;
+      background: rgba(60, 100, 150, 0.9);
+      color: #fff;
+      border: 1px solid #999;
+      border-radius: 4px;
+      z-index: 99999;
+      font-size: 14px;
+    }
+    #desktopMenu ul {
+      list-style: none;
+      margin: 0;
+      padding: 5px 0;
+    }
+    #desktopMenu li {
+      padding: 5px 10px;
+      white-space: nowrap;
+      cursor: default;
+      position: relative;
+    }
+    #desktopMenu li:not(.disabled):hover {
+      background: rgba(255,255,255,0.2);
+    }
+    #desktopMenu hr {
+      border: none;
+      border-top: 1px solid #aaa;
+      margin: 5px 0;
+    }
+    .disabled {
+      color: #aaa;
+      pointer-events: none;
+    }
+
+    /* Подменю "Создать" */
+    .submenu-list {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      display: none;
+      background: rgba(60, 100, 150, 0.9);
+      border: 1px solid #999;
+      border-radius: 4px;
+      min-width: 200px;
+      list-style: none;
+      padding: 5px 0;
+      z-index: 999999;
+    }
+    .submenu-list li {
+      padding: 5px 10px;
+      white-space: nowrap;
+      cursor: default;
+    }
+    .submenu-list li:not(.disabled):hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* ===== Меню предмета (#itemMenu) ===== */
+    #itemMenu {
+      position: absolute;
+      display: none;
+      background: rgba(60, 100, 150, 0.9);
+      color: #fff;
+      border: 1px solid #999;
+      border-radius: 4px;
+      min-width: 180px;
+      z-index: 99999;
+      font-size: 14px;
+    }
+    #itemMenu ul {
+      list-style: none;
+      margin: 0;
+      padding: 5px 0;
+    }
+    #itemMenu li {
+      padding: 5px 10px;
+      white-space: nowrap;
+      cursor: default;
+    }
+    #itemMenu li:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    #itemMenu hr {
+      border: none;
+      border-top: 1px solid #aaa;
+      margin: 5px 0;
+    }
+
+    /* ===== Полупрозрачный блок со списком заданий ===== */
+    .tasks-panel {
+      position: absolute;
+      top: 50px;
+      right: 10px;
+      width: 220px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid #aaa;
+      border-radius: 8px;
+      padding: 10px;
+      color: #fff;
+      z-index: 9999;
+      font-size: 14px;
+    }
+    .tasks-panel h3 {
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #fff;
+      text-shadow: 0 0 3px rgba(0,0,0,0.7);
+    }
+    .tasks-panel ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .tasks-panel li {
+      margin-bottom: 5px;
+      padding: 3px;
+    }
+    /* Выполненные задания — зелёные */
+    .tasks-panel li.completed {
+      background: rgba(0,128,0,0.5);
+      border-radius: 4px;
+    }
+
+    /* ===== Финальное уведомление ===== */
+    .final-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+    }
+    .final-message {
       background: rgba(255, 255, 255, 0.9);
       color: #333;
+      width: 300px;
       padding: 20px;
       border-radius: 10px;
-      max-width: 600px;
       text-align: center;
     }
-    .modal-content h2 {
-      margin-top: 0;
+    .final-message h2 {
+      margin-bottom: 20px;
     }
-    .close-modal-btn {
+    .final-message a.btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #f4d03f;
+      color: #333;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .final-message a.btn:hover {
+      background: #f1c40f;
+    }
+
+    /* ===== Кастомные диалоги ===== */
+    .dialog-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+    }
+    .dialog-window {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      width: 400px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .dialog-window h2 {
+      margin-bottom: 10px;
+    }
+    .dialog-window p {
+      margin-bottom: 10px;
+    }
+    .dialog-buttons {
+      text-align: right;
       margin-top: 20px;
+    }
+    .dialog-buttons button {
+      margin-left: 10px;
+      padding: 6px 12px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+    }
+    .dialog-buttons .ok-btn {
       background: #1e3a8a;
       color: #fff;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      border-radius: 5px;
-      font-weight: bold;
     }
-    .close-modal-btn:hover {
-      background: #0f1c49;
+    .dialog-buttons .cancel-btn,
+    .dialog-buttons .no-btn {
+      background: #ccc;
+      color: #333;
+    }
+    .dialog-buttons .yes-btn {
+      background: #f44336;
+      color: #fff;
     }
   </style>
 </head>
 <body>
-
-<!-- Модальное окно -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-content">
-    <h2>Добро пожаловать на новый этап квеста!</h2>
-    <p>Перед вами будет очень мелкий текст.
-       Нажмите «Продолжить», чтобы приступить, а затем используйте лупу (иконка в правом верхнем углу)
-       для прочтения текста и поиска ключевого слова.</p>
-    <button class="close-modal-btn" id="closeModalBtn">Продолжить</button>
-  </div>
-</div>
-
-<!-- Основной контейнер -->
-<div class="container" id="outerContainer" style="visibility: hidden;">
-  <a href="{% url 'map' %}" class="back">
-    <img src="{% static 'accounts/img/back.png' %}" alt="Back">
-  </a>
-
-  <button class="magnifier-toggle" id="magnifierToggle">
-    <img src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="Лупа">
-  </button>
-
-  <!-- Блок с текстом -->
-  <div class="text-wrapper" id="originalWrapper">
-    <p class="tiny-text" id="originalText">
-      Это пример заметки об Astra‑Linux. Внимательно изучите текст, чтобы обнаружить скрытую подсказку.
-      Например, слово <span id="keyword">Astra</span> является ключевым и будет использовано в дальнейшем квесте.
-      <br><br>
-      Тут может быть ещё несколько строк мелкого текста,
-      чтобы пользователь действительно не смог прочесть его без лупы.
-      При наведении лупы вы должны видеть ровно тот фрагмент,
-      который скрывается в этой области.
-    </p>
-  </div>
-</div>
-
-<!-- Лупа -->
-<div class="magnifier" id="magnifier">
-  <div class="magnifier-content" id="magnifierContent">
-    <div class="text-wrapper-clone" id="cloneWrapper">
-      <p class="tiny-text">
-        Это пример заметки об Astra‑Linux. Внимательно изучите текст, чтобы обнаружить скрытую подсказку.
-        Например, слово <span id="keywordClone">Astra</span> является ключевым и будет использовано в дальнейшем квесте.
-        <br><br>
-        Тут может быть ещё несколько строк мелкого текста,
-        чтобы пользователь действительно не смог прочесть его без лупы.
-        При наведении лупы вы должны видеть ровно тот фрагмент,
-        который скрывается в этой области.
-      </p>
+  <!-- Верхняя панель -->
+  <div class="top-panel">
+    <div class="panel-left">
+      Astra Linux – Рабочий стол
+    </div>
+    <div class="panel-right">
+      <a href="{% url 'map' %}" class="back">
+        <img src="{% static 'accounts/img/back.png' %}" alt="Back">
+      </a>
     </div>
   </div>
-</div>
 
-<script>
-  /* Ссылки на элементы */
-  const modalOverlay     = document.getElementById('modalOverlay');
-  const closeModalBtn    = document.getElementById('closeModalBtn');
-  const outerContainer   = document.getElementById('outerContainer');
-  const textWrapper      = document.getElementById('originalWrapper');
-  const magnifierToggle  = document.getElementById('magnifierToggle');
-  const magnifier        = document.getElementById('magnifier');
-  const magnifierContent = document.getElementById('magnifierContent');
+  <!-- Рабочий стол -->
+  <div class="desktop" id="desktop">
+    <!-- Пример иконки (существующей) -->
+    <div class="icon" data-name="Documents">
+      <img src="https://cdn-icons-png.flaticon.com/512/376/376998.png" alt="Folder">
+      <span>Documents</span>
+    </div>
+  </div>
 
-  const keyword      = document.getElementById('keyword');
-  const keywordClone = document.getElementById('keywordClone');
+  <!-- Меню рабочего стола -->
+  <div id="desktopMenu">
+    <ul>
+      <li class="disabled">Перерисовать экран</li>
+      <li class="disabled">Рабочий стол</li>
+      <hr>
+      <li class="disabled">Обновить иконки</li>
+      <li class="disabled">Выровнять по сетке</li>
+      <li class="disabled">Упорядочить в колонки</li>
+      <hr>
+      <li class="disabled">Окна каскадом</li>
+      <li class="disabled">Сверху вниз</li>
+      <li class="disabled">Слева направо</li>
+      <li class="disabled">Матричный</li>
+      <hr>
+      <li class="disabled">Закрыть все</li>
+      <li class="disabled">Свернуть-развернуть все</li>
+      <hr>
+      <li class="disabled">Вставить</li>
+      <li class="disabled">Панель задач</li>
+      <li class="disabled">Переключать столбов</li>
+      <hr>
+      <!-- Пункт "Создать" -->
+      <li id="menuCreate">Создать
+        <ul class="submenu-list" id="submenuCreate">
+          <li onclick="createItem('folder')">Папка</li>
+          <li onclick="createItem('textfile')">Текстовый файл</li>
+          <li class="disabled">Ярлык</li>
+          <hr>
+          <li onclick="createItem('libre-draw')">Рисунок LibreOffice</li>
+          <li onclick="createItem('libre-present')">Презентация LibreOffice</li>
+          <li onclick="createItem('libre-sheet')">Таблица LibreOffice</li>
+          <li onclick="createItem('libre-doc')">Документ LibreOffice</li>
+        </ul>
+      </li>
+      <hr>
+      <li class="disabled">Свойства...</li>
+    </ul>
+  </div>
 
-  let magnifierActive = false;
+  <!-- Меню предмета (файла/папки) -->
+  <div id="itemMenu">
+    <ul>
+      <li class="disabled">Открыть</li>
+      <li onclick="renameItem()">Переименовать</li>
+      <li onclick="deleteItem()">Удалить</li>
+      <hr>
+      <li class="disabled">Свойства</li>
+    </ul>
+  </div>
 
-  // Закрываем модалку
-  closeModalBtn.addEventListener('click', function() {
-    modalOverlay.style.display = 'none';
-    outerContainer.style.visibility = 'visible';
-  });
+  <!-- Полупрозрачный блок со списком заданий -->
+  <div class="tasks-panel" id="tasksPanel">
+    <h3>Задания</h3>
+    <ul id="tasksList"></ul>
+  </div>
 
-  // Включение/выключение лупы
-  magnifierToggle.addEventListener('click', function() {
-    magnifierActive = !magnifierActive;
-    if (magnifierActive) {
-      textWrapper.addEventListener('mousemove', handleMouseMove);
-      textWrapper.addEventListener('mouseleave', handleMouseLeave);
-    } else {
-      textWrapper.removeEventListener('mousemove', handleMouseMove);
-      textWrapper.removeEventListener('mouseleave', handleMouseLeave);
-      magnifier.style.display = 'none';
-      removeKeywordHighlight();
+  <!-- Финальное уведомление -->
+  <div class="final-overlay" id="finalOverlay">
+    <div class="final-message">
+      <h2>Поздравляем! Ты прошел испытание, твоя награда: «Файл Знаний»</h2>
+      <p>Вы выполнили все задания.</p>
+      <a href="{% url 'map' %}" class="btn transition">Продолжить</a>
+    </div>
+  </div>
+
+  <!-- Кастомный диалог -->
+  <div class="dialog-overlay" id="dialogOverlay">
+    <div class="dialog-window">
+      <h2 id="dialogTitle">Подтверждение</h2>
+      <p id="dialogMessage"></p>
+      <input type="text" id="dialogInput" style="display: none; width: 100%; box-sizing: border-box; padding: 5px; margin-bottom: 10px;">
+      <div class="dialog-buttons" id="dialogButtons"></div>
+    </div>
+  </div>
+
+  <script>
+    const desktop       = document.getElementById('desktop');
+    const desktopMenu   = document.getElementById('desktopMenu');
+    const itemMenu      = document.getElementById('itemMenu');
+    const menuCreate    = document.getElementById('menuCreate');
+    const submenuCreate = document.getElementById('submenuCreate');
+
+    const tasksPanel    = document.getElementById('tasksPanel');
+    const tasksList     = document.getElementById('tasksList');
+    const finalOverlay  = document.getElementById('finalOverlay');
+
+    const dialogOverlay  = document.getElementById('dialogOverlay');
+    const dialogTitle    = document.getElementById('dialogTitle');
+    const dialogMessage  = document.getElementById('dialogMessage');
+    const dialogInput    = document.getElementById('dialogInput');
+    const dialogButtons  = document.getElementById('dialogButtons');
+
+    let selectedIcon = null;
+
+    // Счётчики для создаваемых объектов
+    let folderCount       = 0;
+    let fileCount         = 0;
+    let shortcutCount     = 0;
+    let libreDrawCount    = 0;
+    let librePresentCount = 0;
+    let libreSheetCount   = 0;
+    let libreDocCount     = 0;
+
+    // Задания
+    let tasks = [
+      { id: 1, text: "Создать папку", completed: false },
+      { id: 2, text: "Переименовать папку", completed: false },
+      { id: 3, text: "Удалить папку", completed: false },
+      { id: 4, text: "Создать текстовый файл", completed: false },
+      { id: 5, text: "Создать рисунок LibreOffice", completed: false },
+      { id: 6, text: "Создать презентацию LibreOffice", completed: false },
+      { id: 7, text: "Создать таблицу LibreOffice", completed: false },
+      { id: 8, text: "Создать документ LibreOffice", completed: false }
+    ];
+
+    initIconsEvents();
+    renderTasks();
+
+    /* ========== МЕНЮ РАБОЧЕГО СТОЛА ========== */
+    desktop.addEventListener('contextmenu', function(e) {
+      const iconEl = e.target.closest('.icon');
+      if (!iconEl) {
+        e.preventDefault();
+        if (selectedIcon) {
+          selectedIcon.classList.remove('selected');
+          selectedIcon = null;
+        }
+        showDesktopMenu(e.clientX, e.clientY);
+      }
+    });
+    document.addEventListener('click', function(e) {
+      if (!desktopMenu.contains(e.target)) {
+        desktopMenu.style.display = 'none';
+        submenuCreate.style.display = 'none';
+      }
+      if (!itemMenu.contains(e.target)) {
+        itemMenu.style.display = 'none';
+      }
+    });
+    menuCreate.addEventListener('mouseenter', function() {
+      showSubmenuCreate();
+    });
+    menuCreate.addEventListener('mouseleave', function() {
+      submenuCreate.style.display = 'none';
+    });
+    function showDesktopMenu(x, y) {
+      desktopMenu.style.display = 'block';
+      desktopMenu.style.left = x + 'px';
+      desktopMenu.style.top  = y + 'px';
+      const dmRect = desktopMenu.getBoundingClientRect();
+      if (dmRect.right > window.innerWidth) {
+        desktopMenu.style.left = (window.innerWidth - dmRect.width - 10) + 'px';
+      }
+      if (dmRect.bottom > window.innerHeight) {
+        desktopMenu.style.top = (window.innerHeight - dmRect.height - 10) + 'px';
+      }
     }
-  });
-
-  function handleMouseMove(e) {
-    const rect = textWrapper.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    magnifier.style.display = 'block';
-
-    const mW = magnifier.offsetWidth;
-    const mH = magnifier.offsetHeight;
-
-    // Лупа идёт за курсором по экрану
-    magnifier.style.left = (e.clientX - mW / 2) + 'px';
-    magnifier.style.top  = (e.clientY - mH / 2) + 'px';
-
-    // Содержимое внутри лупы смещаем согласно масштабу
-    magnifierContent.style.left = (-(x * 2) + mW / 2) + 'px';
-    magnifierContent.style.top  = (-(y * 2) + mH / 2) + 'px';
-
-    highlightKeywordIfNeeded(x, y);
-  }
-
-  function handleMouseLeave() {
-    magnifier.style.display = 'none';
-    removeKeywordHighlight();
-  }
-
-  function highlightKeywordIfNeeded(x, y) {
-    const keywordRect = keyword.getBoundingClientRect();
-    const textRect    = textWrapper.getBoundingClientRect();
-
-    const kwLeft   = keywordRect.left - textRect.left;
-    const kwTop    = keywordRect.top  - textRect.top;
-    const kwRight  = kwLeft + keywordRect.width;
-    const kwBottom = kwTop  + keywordRect.height;
-
-    if (x > kwLeft && x < kwRight && y > kwTop && y < kwBottom) {
-      keyword.classList.add('keyword-highlight');
-      keywordClone.classList.add('keyword-highlight');
-    } else {
-      removeKeywordHighlight();
+    function showSubmenuCreate() {
+      submenuCreate.style.display = 'block';
+      submenuCreate.style.left = '100%';
+      submenuCreate.style.top  = '0';
+      const subRect = submenuCreate.getBoundingClientRect();
+      if (subRect.right > window.innerWidth) {
+        submenuCreate.style.left = -(subRect.width) + 'px';
+      }
+      if (subRect.bottom > window.innerHeight) {
+        let diff = subRect.bottom - window.innerHeight + 10;
+        submenuCreate.style.top = (-diff) + 'px';
+      }
     }
-  }
 
-  function removeKeywordHighlight() {
-    keyword.classList.remove('keyword-highlight');
-    keywordClone.classList.remove('keyword-highlight');
-  }
+    /* ========== МЕНЮ ПРЕДМЕТА ========== */
+    function onIconRightClick(e) {
+      e.preventDefault();
+      if (selectedIcon && selectedIcon !== this) {
+        selectedIcon.classList.remove('selected');
+      }
+      selectedIcon = this;
+      selectedIcon.classList.add('selected');
+      showItemMenu(e.clientX, e.clientY);
+    }
+    function onIconLeftClick(e) {
+      if (selectedIcon && selectedIcon !== this) {
+        selectedIcon.classList.remove('selected');
+      }
+      selectedIcon = this;
+      selectedIcon.classList.add('selected');
+      itemMenu.style.display = 'none';
+      desktopMenu.style.display = 'none';
+    }
+    function showItemMenu(x, y) {
+      itemMenu.style.display = 'block';
+      itemMenu.style.left = x + 'px';
+      itemMenu.style.top  = y + 'px';
+      const imRect = itemMenu.getBoundingClientRect();
+      if (imRect.right > window.innerWidth) {
+        itemMenu.style.left = (window.innerWidth - imRect.width - 10) + 'px';
+      }
+      if (imRect.bottom > window.innerHeight) {
+        itemMenu.style.top = (window.innerHeight - imRect.height - 10) + 'px';
+      }
+    }
 
-  keyword.addEventListener('click', function() {
-    alert('Подсказка найдена! Переходим к следующему этапу квеста.');
-  });
-  keywordClone.addEventListener('click', function() {
-    alert('Подсказка найдена! Переходим к следующему этапу квеста.');
-  });
-</script>
+    /* ========== ДЕЙСТВИЯ С ПРЕДМЕТОМ ========== */
+    // "Открыть" теперь отключено (disabled)
+    function renameItem() {
+      if (!selectedIcon) return;
+      const oldName = selectedIcon.getAttribute('data-name') || 'Безымянный';
+      showDialog({
+        title: 'Переименовать',
+        message: `Новое имя для «${oldName}»`,
+        type: 'prompt',
+        defaultValue: oldName,
+        onConfirm: (newVal) => {
+          if (newVal) {
+            selectedIcon.setAttribute('data-name', newVal);
+            selectedIcon.querySelector('span').textContent = newVal;
+            if (isFolder(selectedIcon)) {
+              completeTask("Переименовать папку");
+            }
+          }
+        }
+      });
+      hideAllMenus();
+    }
+    function deleteItem() {
+      if (!selectedIcon) return;
+      const name = selectedIcon.getAttribute('data-name') || 'Безымянный';
+      showDialog({
+        title: 'Удаление',
+        message: `Удалить «${name}»?`,
+        type: 'delete',
+        onConfirm: () => {
+          if (isFolder(selectedIcon)) {
+            completeTask("Удалить папку");
+          }
+          desktop.removeChild(selectedIcon);
+          selectedIcon = null;
+        }
+      });
+      hideAllMenus();
+    }
+    function isFolder(iconEl) {
+      const img = iconEl.querySelector('img');
+      if (!img) return false;
+      return img.src.includes("376998") || img.src.includes("folder");
+    }
+
+    /* ========== СОЗДАТЬ (меню рабочего стола) ========== */
+    function createItem(type) {
+      let iconURL = '';
+      let label = '';
+
+      switch(type) {
+        case 'folder':
+          folderCount++;
+          iconURL = "https://cdn-icons-png.flaticon.com/512/376/376998.png";
+          label   = `Новая папка (${folderCount})`;
+          completeTask("Создать папку");
+          break;
+        case 'textfile':
+          fileCount++;
+          iconURL = "https://cdn-icons-png.flaticon.com/512/337/337946.png";
+          label   = `Новый текстовый файл (${fileCount})`;
+          completeTask("Создать текстовый файл");
+          break;
+        case 'libre-draw':
+          libreDrawCount++;
+          iconURL = "https://cdn-icons-png.flaticon.com/512/185/185851.png";
+          label   = `Новый рисунок (${libreDrawCount})`;
+          completeTask("Создать рисунок LibreOffice");
+          break;
+        case 'libre-present':
+          librePresentCount++;
+          iconURL = "https://cdn-icons-png.flaticon.com/512/732/732030.png";
+          label   = `Новая презентация (${librePresentCount})`;
+          completeTask("Создать презентацию LibreOffice");
+          break;
+        case 'libre-sheet':
+          libreSheetCount++;
+          iconURL = "https://cdn-icons-png.flaticon.com/512/732/732017.png";
+          label   = `Новая таблица (${libreSheetCount})`;
+          completeTask("Создать таблицу LibreOffice");
+          break;
+        case 'libre-doc':
+          libreDocCount++;
+          iconURL = "https://cdn-icons-png.flaticon.com/512/732/732012.png";
+          label   = `Новый документ (${libreDocCount})`;
+          completeTask("Создать документ LibreOffice");
+          break;
+        default:
+          return;
+      }
+
+      const iconDiv = document.createElement('div');
+      iconDiv.className = 'icon';
+      iconDiv.setAttribute('data-name', label);
+
+      const img = document.createElement('img');
+      img.src = iconURL;
+
+      const span = document.createElement('span');
+      span.textContent = label;
+
+      iconDiv.appendChild(img);
+      iconDiv.appendChild(span);
+      desktop.appendChild(iconDiv);
+
+      iconDiv.addEventListener('click', onIconLeftClick);
+      iconDiv.addEventListener('contextmenu', onIconRightClick);
+
+      hideAllMenus();
+    }
+
+    function hideAllMenus() {
+      desktopMenu.style.display = 'none';
+      submenuCreate.style.display = 'none';
+      itemMenu.style.display = 'none';
+    }
+
+    function initIconsEvents() {
+      const icons = document.querySelectorAll('.icon');
+      icons.forEach(icon => {
+        icon.addEventListener('click', onIconLeftClick);
+        icon.addEventListener('contextmenu', onIconRightClick);
+      });
+    }
+
+    /* ========== ЛОГИКА ЗАДАНИЙ ========== */
+    function renderTasks() {
+      tasksList.innerHTML = '';
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.textContent = task.text;
+        if (task.completed) {
+          li.classList.add('completed');
+        }
+        tasksList.appendChild(li);
+      });
+    }
+    function completeTask(taskText) {
+      const t = tasks.find(t => t.text === taskText);
+      if (t && !t.completed) {
+        t.completed = true;
+        renderTasks();
+        checkAllTasks();
+      }
+    }
+    function checkAllTasks() {
+      const allDone = tasks.every(t => t.completed);
+      if (allDone) {
+        finalOverlay.style.display = 'flex';
+      }
+    }
+
+    /* ========== Финальное уведомление ========== */
+    function goBack() {
+      finalOverlay.style.display = 'none';
+      // Здесь можно осуществить переход на другую страницу
+    }
+
+    /* ========== Кастомный диалог ========== */
+    function showDialog({ title, message, type, defaultValue = '', onConfirm, onCancel }) {
+      dialogTitle.textContent   = title;
+      dialogMessage.textContent = message;
+      dialogInput.style.display = 'none';
+      dialogInput.value = '';
+      dialogButtons.innerHTML   = '';
+
+      if (type === 'prompt') {
+        dialogInput.style.display = 'block';
+        dialogInput.value = defaultValue;
+        createButton('OK', 'ok-btn', () => {
+          if (onConfirm) onConfirm(dialogInput.value);
+          closeDialog();
+        });
+        createButton('Отмена', 'cancel-btn', () => {
+          if (onCancel) onCancel();
+          closeDialog();
+        });
+      } else if (type === 'delete') {
+        createButton('Да', 'yes-btn', () => {
+          if (onConfirm) onConfirm();
+          closeDialog();
+        });
+        createButton('Нет', 'no-btn', () => {
+          if (onCancel) onCancel();
+          closeDialog();
+        });
+      } else {
+        createButton('OK', 'ok-btn', () => {
+          if (onConfirm) onConfirm();
+          closeDialog();
+        });
+        createButton('Отмена', 'cancel-btn', () => {
+          if (onCancel) onCancel();
+          closeDialog();
+        });
+      }
+      dialogOverlay.style.display = 'flex';
+    }
+    function createButton(text, className, onClick) {
+      const btn = document.createElement('button');
+      btn.textContent = text;
+      btn.className   = className;
+      btn.addEventListener('click', onClick);
+      dialogButtons.appendChild(btn);
+    }
+    function closeDialog() {
+      dialogOverlay.style.display = 'none';
+    }
+  </script>
 </body>
 </html>

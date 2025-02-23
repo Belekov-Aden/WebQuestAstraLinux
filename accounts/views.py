@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.serializers import json
+from django.db.models.fields import json
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -69,6 +69,9 @@ def stage_one_main(request):
 
 def stage_one_task(request):
     return render(request, 'accounts/stage_one/stage_one_task.html')
+
+def stage_three_main(request):
+    return render(request, 'accounts/stage_three/stage_three_main.html')
 
 
 def terminal_view(request):

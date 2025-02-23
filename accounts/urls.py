@@ -10,6 +10,7 @@ urlpatterns = [
     path('stage_one_main/', views.stage_one_main, name='stage_one_main'),
     path('stage_one_task/', views.stage_one_task, name='stage_one_task'),
     path('terminal/', views.terminal_view, name='terminal'),
+    path('stage_three_main/', views.stage_three_main, name='stage_three_main'),
     path("save_quiz_result_one/", views.save_quiz_result, name="save_quiz_result"),
     path('save_quiz_result_two/', views.save_quiz_result_two, name='save_quiz_result_two'),
     path('signup/', views.register, name='signup'),
