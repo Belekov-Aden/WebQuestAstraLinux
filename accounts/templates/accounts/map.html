@@ -120,6 +120,84 @@
             height: auto;
         }
 
+        .trigger-tile {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: background-color 0.3s ease;
+        }
+
+        .trigger-tile:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Сайдбар */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px; /* Скрываем сайдбар за пределами экрана */
+            width: 300px;
+            height: 100vh;
+            background-color: #0f1c49; /* Залитый фон */
+            transition: left 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* Контент сайдбара */
+        .sidebar-content {
+            margin-top: 50px;
+            padding: 20px;
+            color: white;
+        }
+
+        .sidebar-content h3 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .sidebar-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-content ul li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar-content ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar-content ul li a:hover {
+            color: yellow;
+        }
+
+        /* Основной контент */
+        .content {
+            padding: 20px;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Открытие сайдбара при наведении на плитку */
+        .trigger-tile:hover + .sidebar,
+        .sidebar:hover {
+            left: 0;
+        }
+
+        .trigger-tile:hover + .sidebar + .content,
+        .sidebar:hover + .content {
+            margin-left: 250px; /* Сдвигаем основной контент при открытии сайдбара */
+        }
+
     </style>
 </head>
 <body>
@@ -130,6 +208,21 @@
     <div class="background-icon-blur second">
         <img src="{% static 'accounts/img/Чмок.png' %}" alt="img">
     </div>
+
+    <div class="trigger-tile">
+        ☰
+    </div>
+
+    <!-- Сайдбар -->
+    <div class="sidebar">
+        <div class="sidebar-content">
+            {#  TODO: Вывести информацию об этапы которые прошел + очивки #}
+            <h3>Имя: {{ request.user.username }}</h3>
+            <p></p>
+
+        </div>
+    </div>
+
     <canvas id="arrowCanvas"></canvas>
     <div id="stage1" class="stage" onclick="window.location.href='{% url 'stage_one_main' %}';">
         1. Знакомство с Astra Linux
@@ -140,8 +233,8 @@
         <i class="icon fa-solid fa-terminal fa-6x"></i>
     </div>
     <div id="stage3" class="stage" onclick="window.location.href='{% url 'stage_three_main' %}';">
-      3. Работа с файлами
-      <i class="icon fa-solid fa-file fa-6x"></i>
+        3. Работа с файлами
+        <i class="icon fa-solid fa-file fa-6x"></i>
     </div>
     <div id="stage4" class="stage">
         4. Основы безопасности
