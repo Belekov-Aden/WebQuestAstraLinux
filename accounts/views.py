@@ -28,16 +28,15 @@ def register(request):
 def user_login(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
-        return redirect('seven_levels')
-        # if form.is_valid():
-        #     username = form.cleaned_data['username']
-        #     password = form.cleaned_data['password']
-        #     user = authenticate(request, username=username, password=password)
-        #     if user is not None:
-        #         login(request, user)
-        #         return redirect('seven_levels')
-        #     else:
-        #         form.add_error(None, "Неверное имя пользователя или пароль")
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('seven_levels')
+            else:
+                form.add_error(None, "Неверное имя пользователя или пароль")
     else:
         form = LoginForm()
 
@@ -64,11 +63,14 @@ def seven_levels(request):
 def map(request):
     return render(request, 'accounts/map.html')
 
+
 def stage_one_main(request):
     return render(request, 'accounts/stage_one/stage_one_main.html')
 
+
 def stage_one_task(request):
     return render(request, 'accounts/stage_one/stage_one_task.html')
+
 
 def stage_three_main(request):
     return render(request, 'accounts/stage_three/stage_three_main.html')
@@ -167,4 +169,3 @@ def save_quiz_result_two(request):
         message = "Результат обновлён"
 
     return JsonResponse({"message": message, "status": "success"})
-
