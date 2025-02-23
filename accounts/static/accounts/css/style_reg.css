@@ -2,6 +2,7 @@
     font-family: Bahnschrift, sans-serif;
     box-sizing: border-box;
 }
+
 body {
     margin: 0;
     padding: 0;
@@ -17,7 +18,7 @@ body {
 /* Контейнер формы —  за которой прячется звезда */
 .registration-container {
     position: relative;
-    overflow: hidden;     /* Обрезаю всё, что выходит за левую границу */
+    overflow: hidden; /* Обрезаю всё, что выходит за левую границу */
     background: #2f3e8f;
     width: 360px;
     padding: 30px;
@@ -25,6 +26,7 @@ body {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     margin: 0 auto;
 }
+
 .star {
     position: absolute;
     top: 40%;
@@ -34,6 +36,7 @@ body {
     transition: left 0.8s ease, transform 0.8s ease;
     z-index: 0;
 }
+
 .registration-container:hover .star {
     left: -60px;
     transform: translateY(-50%) rotate(15deg);
@@ -45,6 +48,7 @@ form p {
     margin-bottom: 15px;
     text-align: left;
 }
+
 form label {
     display: block;
     font-size: 20px;
@@ -53,6 +57,7 @@ form label {
     color: white;
     padding: 10px 0 0 0;
 }
+
 form input[type="text"],
 form input[type="password"],
 form input[type="email"] {
@@ -67,9 +72,11 @@ form input[type="email"] {
     transition: background 0.3s, border-color 0.3s;
     margin-bottom: 5px;
 }
+
 form input::placeholder {
     color: rgba(255, 255, 255, 0.7);
 }
+
 form input:focus {
     background: rgba(255, 255, 255, 0.1);
     border-color: #fff;
@@ -81,6 +88,7 @@ form input:focus {
     font-style: italic;
     color: #ddd;
 }
+
 ul {
     font-size: 14px;
     font-style: italic;
@@ -89,6 +97,7 @@ ul {
     padding-left: 10px;
     padding-top: 0px;
 }
+
 ul.errorlist {
     margin: 5px 0 0 0;
     padding-left: 20px;
@@ -112,6 +121,7 @@ form button {
     cursor: pointer;
     transition: 0.3s;
 }
+
 form button:hover {
     background: rgba(255, 255, 255, 0.2);
 }
@@ -125,6 +135,7 @@ form a {
     font-weight: bold;
     text-decoration: none;
 }
+
 form a:hover {
     color: yellow;
     text-shadow: 0 0 5px yellow, 0 0 10px yellow, 0 0 15px yellow;
@@ -132,4 +143,54 @@ form a:hover {
 
 .login {
     text-align: center;
+}
+
+
+.circle {
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border: 15px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    opacity: 0.7;
+    filter: blur(10px);
+}
+
+/* Размещение полукругов */
+.top-right {
+    width: 120px;
+    height: 120px;
+    top: 10%;
+    right: 10%;
+    clip-path: inset(1 25% 50% 0);
+}
+
+.bottom-left {
+    bottom: 10%;
+    left: 10%;
+    clip-path: inset(50% 25% 0 1);
+}
+
+/* Квадраты */
+.square {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(45deg);
+    opacity: 0.7;
+    filter: blur(10px);
+}
+
+/* Размещение квадратов */
+.top-left {
+    top: 15%;
+    left: 15%;
+}
+
+.bottom-right {
+    bottom: 15%;
+    right: 15%;
+    width: 100px;
+    height: 100px;
 }
