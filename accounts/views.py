@@ -169,3 +169,4 @@ def save_quiz_result_two(request):
             message = "Результат сохранён"
 
         return JsonResponse({"message": message, "status": "success"})
+
