@@ -170,3 +170,6 @@ def save_quiz_result_two(request):
 
         return JsonResponse({"message": message, "status": "success"})
 
+
+def stage_four(request):
+    return render(request, 'accounts/stage_four/index.html')
