@@ -122,28 +122,23 @@ def save_quiz_result(request):
         step = data.get('step')
         total_questions = data.get("total_questions")
 
-        if QuizResult.objects.get(step=step):
-            quiz_result, created = QuizResult.objects.update_or_create(
-                user=user,
-                step=step,
-                defaults={
-                    'score': score,
-                    'total_questions': total_questions
-                }
-            )
+        if QuizResult.objects.filter(user=user, step=step).exists():
+            quiz_result = QuizResult.objects.filter(user=user, step=step).first()
+            quiz_result.score = score
+            quiz_result.step = step
+            quiz_result.total_questions = total_questions
+
+            quiz_result.save()
+            message = "Результат обновлён"
         else:
             QuizResult.objects.create(
                 user=user,
                 step=step,
                 score=score,
+                total_questions=total_questions
             )
 
-        if created:
-            message = "Результат сохранён"
-        else:
-            message = "Результат обновлён"
-
-        return JsonResponse({"message": message, "status": "success"})
+        return JsonResponse({"message": 'message', "status": "success"})
 
 
 @login_required
