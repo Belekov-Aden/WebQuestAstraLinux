@@ -128,7 +128,24 @@
     </div>
 </div>
 <script>
+
+    function saveQuizResult(score) {
+        fetch("/save_quiz_result_one/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({score: score, total_questions: 4, step: 4})
+        })
+            .then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error("Ошибка:", error));
+    }
+
+
     document.getElementById('quiz-form').addEventListener('submit', function (event) {
+
+
         event.preventDefault();
 
         const answers = {
@@ -147,15 +164,19 @@
             }
         }
 
+
         const results = document.getElementById('results');
         results.innerHTML = `Вы ответили правильно на ${score} из 4 вопросов.`;
+        saveQuizResult(score);
 
         if (score === 4) {
             results.style.color = 'green';
         } else {
             results.style.color = 'red';
         }
+
     });
+
 
     function restartQuiz() {
         // Сбрасываем выбранные ответы
