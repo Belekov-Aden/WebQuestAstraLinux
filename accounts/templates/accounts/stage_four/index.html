@@ -1,0 +1,173 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мини-лекция по безопасности</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/stage_four.css' %}">
+</head>
+<body>
+
+<style>
+    p {
+        color: #1e3a8a;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to right, #1e3a8a, #0f1c49);
+        color: white;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+    }
+
+    .container {
+        position: relative;
+        max-width: 800px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .back {
+        position: absolute; /* Абсолютное позиционирование внутри контейнера */
+        top: 15px; /* Отступ от верхнего края контейнера */
+        left: 10px;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .back img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .restart {
+        position: absolute;
+        top: 10px;
+        left: 50px;
+        padding: 2px 0 0 0;
+        margin: 0 0 0 15px;
+        font-size: 19px;
+        cursor: pointer;
+        background: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        transform: scaleX(-1);
+    }
+
+</style>
+
+<div class="container">
+    <h1>Основы безопасности в интернете</h1>
+    <button class="restart" onclick="restartQuiz()">
+        <i class="icon fa-solid fa-rotate-left fa-2x"></i>
+    </button>
+    <a href="{% url 'map' %}" class="back">
+        <img src="{% static 'accounts/img/back.png' %}" alt="Back">
+    </a>
+    <div class="infographic">
+        <div class="info-item">
+            <h2>Пароли</h2>
+            <p>Используйте сложные пароли, состоящие из букв, цифр и специальных символов. Не используйте один и тот же
+                пароль для разных аккаунтов.</p>
+        </div>
+        <div class="info-item">
+            <h2>Обновления системы</h2>
+            <p>Регулярно обновляйте операционную систему и программное обеспечение, чтобы защититься от уязвимостей.</p>
+        </div>
+        <div class="info-item">
+            <h2>Защита от вирусов</h2>
+            <p>Установите антивирусное программное обеспечение и регулярно проверяйте систему на наличие вредоносных
+                программ.</p>
+        </div>
+    </div>
+    <div class="quiz">
+        <h2>Пройдите тест</h2>
+        <form id="quiz-form">
+            <div class="question">
+                <p>1. Какой пароль считается наиболее безопасным?</p>
+                <label><input type="radio" name="q1" value="a"> 123456</label>
+                <label><input type="radio" name="q1" value="b"> Password</label>
+                <label><input type="radio" name="q1" value="c"> A1b2C3!</label>
+            </div>
+            <div class="question">
+                <p>2. Почему важно обновлять операционную систему?</p>
+                <label><input type="radio" name="q2" value="a"> Чтобы получить новые функции</label>
+                <label><input type="radio" name="q2" value="b"> Чтобы защититься от уязвимостей</label>
+                <label><input type="radio" name="q2" value="c"> Чтобы увеличить скорость работы</label>
+            </div>
+            <div class="question">
+                <p>3. Что помогает защитить компьютер от вирусов?</p>
+                <label><input type="radio" name="q3" value="a"> Регулярное обновление антивируса</label>
+                <label><input type="radio" name="q3" value="b"> Установка новых игр</label>
+                <label><input type="radio" name="q3" value="c"> Увеличение объема оперативной памяти</label>
+            </div>
+            <div class="question">
+                <p>4. Как часто следует проверять систему на вирусы?</p>
+                <label><input type="radio" name="q4" value="a"> Раз в год</label>
+                <label><input type="radio" name="q4" value="b"> Раз в месяц</label>
+                <label><input type="radio" name="q4" value="c"> Раз в неделю</label>
+            </div>
+            <button type="submit">Проверить ответы</button>
+        </form>
+        <div id="results"></div>
+    </div>
+</div>
+<script>
+    document.getElementById('quiz-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const answers = {
+            q1: 'c',
+            q2: 'b',
+            q3: 'a',
+            q4: 'c'
+        };
+
+        let score = 0;
+
+        for (let i = 1; i <= 4; i++) {
+            const selected = document.querySelector(`input[name="q${i}"]:checked`);
+            if (selected && selected.value === answers[`q${i}`]) {
+                score++;
+            }
+        }
+
+        const results = document.getElementById('results');
+        results.innerHTML = `Вы ответили правильно на ${score} из 4 вопросов.`;
+
+        if (score === 4) {
+            results.style.color = 'green';
+        } else {
+            results.style.color = 'red';
+        }
+    });
+
+    function restartQuiz() {
+        // Сбрасываем выбранные ответы
+        const form = document.getElementById('quiz-form');
+        form.reset();
+
+        // Очищаем результаты
+        const results = document.getElementById('results');
+        results.innerHTML = '';
+        results.style.color = '';
+    }
+</script>
+<script src="https://kit.fontawesome.com/f6a8e85efb.js" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -13,6 +13,7 @@ urlpatterns = [
     path('stage_three_main/', views.stage_three_main, name='stage_three_main'),
     path("save_quiz_result_one/", views.save_quiz_result, name="save_quiz_result"),
     path('save_quiz_result_two/', views.save_quiz_result_two, name='save_quiz_result_two'),
+    path('stage_four/', views.stage_four, name='stage_four'),
     path('signup/', views.register, name='signup'),
     path('login/', views.user_login, name='login'),
     path('logout/', views.user_logout, name='logout'),
