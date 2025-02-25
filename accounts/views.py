@@ -198,3 +198,7 @@ def stage_four(request):
 
 def stage_five_main(request):
     return render(request, 'accounts/stage_five/stage_five_main.html')
+
+
+def stage_six(request):
+    return render(request, 'accounts/stage_six/index.html')
