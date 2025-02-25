@@ -26,6 +26,7 @@ def register(request):
 
 
 def user_login(request):
+    # root, root
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -166,5 +167,33 @@ def save_quiz_result_two(request):
         return JsonResponse({"message": message, "status": "success"})
 
 
+@login_required
+@csrf_exempt
+def save_quiz_result_five(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        user = request.user
+        completed = data.get('completed')
+        step = data.get('step')
+
+        if QuizResult.objects.filter(user=user, step=step).exists():
+            quiz_result = QuizResult.objects.filter(user=user, step=step).first()
+            quiz_result.score = completed
+            quiz_result.save()
+            message = "Результат обновлён"
+        else:
+            QuizResult.objects.create(
+                user=user,
+                step=step,
+            )
+            message = "Результат сохранён"
+
+        return JsonResponse({"message": message, "status": "success"})
+
+
 def stage_four(request):
     return render(request, 'accounts/stage_four/index.html')
+
+
+def stage_five_main(request):
+    return render(request, 'accounts/stage_five/stage_five_main.html')
