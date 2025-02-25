@@ -2,409 +2,441 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Интерактивный терминал Astra‑Linux</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: #0f0;
-      font-family: monospace;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-    /* Приветственное окно (оставляем без изменений) */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal {
-      background: #111;
-      border: 1px solid #0f0;
-      padding: 30px;
-      text-align: center;
-      max-width: 500px;
-      color: #0f0;
-      font-size: 18px;
-    }
-    .modal p {
-      margin-bottom: 20px;
-    }
-    .pill-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-    .pill-button {
-      border: none;
-      padding: 10px 20px;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    .blue-pill {
-      background: #1a2f60;
-    }
-    .red-pill {
-      background: red;
-    }
-    .green-pill {
-      background: #00f000;
-    }
-    /* Терминал */
-    .terminal-container {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .terminal {
-      border: 1px solid #0f0;
-      padding: 20px;
-      background: #000;
-      min-height: 400px;
-      position: relative;
-    }
-    .input-line {
-      display: flex;
-      align-items: center;
-    }
-    .prompt {
-      margin-right: 5px;
-    }
-    .terminal-input {
-      background: transparent;
-      border: none;
-      color: #0f0;
-      font-size: 16px;
-      flex: 1;
-    }
-    .terminal-input:focus {
-      outline: none;
-    }
-    .output {
-      white-space: pre-wrap;
-      margin-bottom: 10px;
-    }
-    /* Блок заданий (справа) */
-    .tasks {
-      width: 300px;
-      border-left: 1px solid #0f0;
-      padding: 20px;
-      overflow-y: auto;
-      color: #0f0;
-      font-size: 14px;
-    }
-    .tasks h2 {
-      margin-top: 0;
-    }
-    .task {
-      margin-bottom: 20px;
-    }
-    .task.active {
-      font-weight: bold;
-      color: #ff0;
-    }
-    /* Выполненные задания – выделяются зелёным */
-    .task.completed {
-      background: rgba(0,128,0,0.5);
-      padding: 5px;
-      border-radius: 4px;
-    }
-    /* Модальное окно завершения задания */
-    #taskCompleteOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1001;
-    }
-    #taskCompleteOverlay .modal {
-      background: #111;
-      border: 1px solid #0f0;
-      padding: 30px;
-      text-align: center;
-      max-width: 500px;
-      color: #0f0;
-      font-size: 18px;
-    }
-    /* Кнопка "Далее" */
-    #taskNextButton {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #1a2f60;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Интерактивный терминал Astra‑Linux</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Приветственное окно (оставляем без изменений) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: #111;
+            border: 1px solid #0f0;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            color: #0f0;
+            font-size: 18px;
+        }
+
+        .modal p {
+            margin-bottom: 20px;
+        }
+
+        .pill-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pill-button {
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .blue-pill {
+            background: #1a2f60;
+        }
+
+        .red-pill {
+            background: red;
+        }
+
+        .green-pill {
+            background: #00f000;
+        }
+
+        /* Терминал */
+        .terminal-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .terminal {
+            border: 1px solid #0f0;
+            padding: 20px;
+            background: #000;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            margin-right: 5px;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .terminal-input:focus {
+            outline: none;
+        }
+
+        .output {
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+
+        /* Блок заданий (справа) */
+        .tasks {
+            width: 300px;
+            border-left: 1px solid #0f0;
+            padding: 20px;
+            overflow-y: auto;
+            color: #0f0;
+            font-size: 14px;
+        }
+
+        .tasks h2 {
+            margin-top: 0;
+        }
+
+        .task {
+            margin-bottom: 20px;
+        }
+
+        .task.active {
+            font-weight: bold;
+            color: #ff0;
+        }
+
+        /* Выполненные задания – выделяются зелёным */
+        .task.completed {
+            background: rgba(0, 128, 0, 0.5);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        /* Модальное окно завершения задания */
+        #taskCompleteOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        #taskCompleteOverlay .modal {
+            background: #111;
+            border: 1px solid #0f0;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            color: #0f0;
+            font-size: 18px;
+        }
+
+        /* Кнопка "Далее" */
+        #taskNextButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #1a2f60;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
 
 <!-- Приветственное окно -->
 <div id="modal-overlay" class="modal-overlay">
-  <div class="modal">
-    <p>"В этом мире, где каждый бит решает судьбу, твоя миссия — проникнуть в недра цифровой вселенной. Выбери свой путь: активируй режим 'Intrusion' и раскрой тайны глобальной сети, или останься в привычном офлайне."</p>
-    <p>Помни: после подключения обратного пути уже не будет!</p>
-    <div class="pill-buttons">
-      <button id="blue-pill" class="pill-button blue-pill">Офлайн (вернуться на карту)</button>
-      <button id="red-pill" class="pill-button red-pill">Intrusion (начать миссию)</button>
+    <div class="modal">
+        <p>"В этом мире, где каждый бит решает судьбу, твоя миссия — проникнуть в недра цифровой вселенной. Выбери свой
+            путь: активируй режим 'Intrusion' и раскрой тайны глобальной сети, или останься в привычном офлайне."</p>
+        <p>Помни: после подключения обратного пути уже не будет!</p>
+        <div class="pill-buttons">
+            <button id="blue-pill" class="pill-button blue-pill">Офлайн (вернуться на карту)</button>
+            <button id="red-pill" class="pill-button red-pill">Intrusion (начать миссию)</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Модальное окно проигрыша -->
 <div id="lose-overlay" class="modal-overlay" style="display:none;">
-  <div class="modal">
-    <p>У вас закончились попытки. Вы проиграли!</p>
-  </div>
+    <div class="modal">
+        <p>У вас закончились попытки. Вы проиграли!</p>
+    </div>
 </div>
 
 <!-- Модальное окно победы -->
 <div id="win-overlay" class="modal-overlay" style="display:none;">
-  <div class="modal">
-    <p>Поздравляем!!! Ты прошел второй этап, твоя награда - «Ключ Настройки»!</p>
-    <div class="pill-buttons">
-      <button id="win-exit" class="pill-button green-pill">Вперед</button>
+    <div class="modal">
+        <p>Поздравляем!!! Ты прошел второй этап, твоя награда - «Ключ Настройки»!</p>
+        <div class="pill-buttons">
+            <button id="win-exit" class="pill-button green-pill">Вперед</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Модальное окно завершения задания -->
 <div id="taskCompleteOverlay" class="modal-overlay">
-  <div class="modal">
-    <p id="taskCompleteMessage"></p>
-    <button id="taskNextButton">Далее</button>
-  </div>
+    <div class="modal">
+        <p id="taskCompleteMessage"></p>
+        <button id="taskNextButton">Далее</button>
+    </div>
 </div>
 
 <div class="terminal-container">
-  <div id="terminal" class="terminal">
-    <div id="terminal-output"></div>
-    <div class="input-line">
-      <span id="prompt" class="prompt">user@astra:~$</span>
-      <input type="text" id="terminal-input" class="terminal-input" autofocus>
+    <div id="terminal" class="terminal">
+        <div id="terminal-output"></div>
+        <div class="input-line">
+            <span id="prompt" class="prompt">user@astra:~$</span>
+            <input type="text" id="terminal-input" class="terminal-input" autofocus>
+        </div>
     </div>
-  </div>
 </div>
 <div class="tasks">
-  <h2>Задания</h2>
-  <div id="task-container"></div>
+    <h2>Задания</h2>
+    <div id="task-container"></div>
 </div>
 
 <script>
-  // Функция для отправки результата (без изменений)
-  function sendCompletionStatus() {
-    fetch("/save_quiz_result_five/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({completed: true, step: 5})
-    })
-    .then(response => response.json())
-    .then(data => console.log(data.message))
-    .catch(error => console.error("Ошибка:", error));
-  }
+    // Функция для отправки результата (без изменений)
+    function sendCompletionStatus() {
+        fetch("/save_quiz_result_five/", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({completed: true, step: 5})
+        })
+            .then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error("Ошибка:", error));
+    }
 
-  // Привязываем кнопки выбора таблетки
-  document.getElementById('blue-pill').addEventListener('click', function () {
-    window.location.href = "{% url 'map' %}";
-  });
-  document.getElementById('red-pill').addEventListener('click', function () {
-    document.getElementById('modal-overlay').style.display = 'none';
-    document.getElementById("terminal-input").focus();
-  });
-  document.getElementById('win-exit').addEventListener('click', function () {
-    window.location.href = "{% url 'map' %}";
-  });
-
-  // Определяем задания и ожидаемые команды
-  let tasks = [
-    { id: 1, description: "Выполните команду: cat /etc/network/interfaces", commands: ['cat /etc/network/interfaces'] },
-    { id: 2, description: "Выполните команду: grep \"enable_firewall\" /etc/ast.conf", commands: ['grep "enable_firewall" /etc/ast.conf'] },
-    { id: 3, description: "Выполните команду: head -n 20 /etc/ast.conf", commands: ['head -n 20 /etc/ast.conf'] },
-    { id: 4, description: "Выполните команду: tail -n 20 /etc/ast.conf", commands: ['tail -n 20 /etc/ast.conf'] }
-  ];
-
-  // Обновлённые симулированные выводы (более подробные)
-  const simulatedOutputs = {
-    'cat /etc/network/interfaces':
-      "auto eth0\n" +
-      "iface eth0 inet dhcp\n" +
-      "# Sample network configuration file\n" +
-      "auto wlan0\n" +
-      "iface wlan0 inet static\n" +
-      "    address 192.168.1.100\n" +
-      "    netmask 255.255.255.0\n" +
-      "    gateway 192.168.1.1\n" +
-      "# End of interfaces file.",
-    'grep "enable_firewall" /etc/ast.conf':
-      "# Firewall configuration\n" +
-      "enable_firewall = yes\n" +
-      "# End of configuration",
-    'head -n 20 /etc/ast.conf':
-      "1: network_mode=auto\n" +
-      "2: enable_firewall=yes\n" +
-      "3: default_gateway=192.168.1.1\n" +
-      "4: dns_server=8.8.8.8\n" +
-      "5: log_level=info\n" +
-      "6: timeout=30\n" +
-      "7: retry=3\n" +
-      "8: max_connections=100\n" +
-      "9: ssl_enabled=yes\n" +
-      "10: certificate=/etc/ssl/cert.pem\n" +
-      "11: key=/etc/ssl/key.pem\n" +
-      "12: interface=eth0\n" +
-      "13: dhcp_enabled=no\n" +
-      "14: static_ip=192.168.1.100\n" +
-      "15: netmask=255.255.255.0\n" +
-      "16: broadcast=192.168.1.255\n" +
-      "17: mtu=1500\n" +
-      "18: vlan_enabled=no\n" +
-      "19: proxy_enabled=no\n" +
-      "20: reserved=none",
-    'tail -n 20 /etc/ast.conf':
-      "81: param81=value81\n" +
-      "82: param82=value82\n" +
-      "83: param83=value83\n" +
-      "84: param84=value84\n" +
-      "85: param85=value85\n" +
-      "86: param86=value86\n" +
-      "87: param87=value87\n" +
-      "88: param88=value88\n" +
-      "89: param89=value89\n" +
-      "90: param90=value90\n" +
-      "91: param91=value91\n" +
-      "92: param92=value92\n" +
-      "93: param93=value93\n" +
-      "94: param94=value94\n" +
-      "95: param95=value95\n" +
-      "96: param96=value96\n" +
-      "97: param97=value97\n" +
-      "98: param98=value98\n" +
-      "99: param99=value99\n" +
-      "100: param100=value100"
-  };
-
-  // Краткие описания для модальных окон
-  const commandDescriptions = {
-    'cat /etc/network/interfaces': "Команда cat выводит содержимое файла /etc/network/interfaces, показывая настройки сетевых интерфейсов.",
-    'grep "enable_firewall" /etc/ast.conf': "Команда grep ищет параметр enable_firewall в файле /etc/ast.conf. Когда вы выполняете эту команду, она выводит все строки, в которых встречается параметр enable_firewall. Это полезно для быстрой проверки, какой статус (например, yes или no) присвоен этому параметру, и помогает убедиться, что файрволл включён или отключён.",
-    'head -n 20 /etc/ast.conf': "Команда head выводит первые 20 строк файла /etc/ast.conf, позволяя увидеть верхнюю часть конфигурации.",
-    'tail -n 20 /etc/ast.conf': "Команда tail выводит последние 20 строк файла /etc/ast.conf, что помогает проверить нижнюю часть файла."
-  };
-
-  let currentTaskIndex = 0;
-
-  function renderTasks() {
-    const container = document.getElementById("task-container");
-    container.innerHTML = "";
-    tasks.forEach((task, index) => {
-      let div = document.createElement("div");
-      div.className = "task";
-      if (index === currentTaskIndex) {
-        div.classList.add("active");
-      }
-      if (task.completed) {
-        div.classList.add("completed");
-      }
-      div.textContent = task.description;
-      container.appendChild(div);
+    // Привязываем кнопки выбора таблетки
+    document.getElementById('blue-pill').addEventListener('click', function () {
+        window.location.href = "{% url 'map' %}";
     });
-  }
+    document.getElementById('red-pill').addEventListener('click', function () {
+        document.getElementById('modal-overlay').style.display = 'none';
+        document.getElementById("terminal-input").focus();
+    });
+    document.getElementById('win-exit').addEventListener('click', function () {
+        window.location.href = "{% url 'map' %}";
+    });
 
-  function completeTask(taskId) {
-    const t = tasks.find(task => task.id === taskId);
-    if (t && !t.completed) {
-      t.completed = true;
-      renderTasks();
-      setTimeout(() => {
-          showTaskCompleteModal(taskId);
-      }, 1000);
+    // Определяем задания и ожидаемые команды
+    let tasks = [
+        {
+            id: 1,
+            description: "Выполните команду: cat /etc/network/interfaces",
+            commands: ['cat /etc/network/interfaces']
+        },
+        {
+            id: 2,
+            description: "Выполните команду: grep \"enable_firewall\" /etc/ast.conf",
+            commands: ['grep "enable_firewall" /etc/ast.conf']
+        },
+        {id: 3, description: "Выполните команду: head -n 20 /etc/ast.conf", commands: ['head -n 20 /etc/ast.conf']},
+        {id: 4, description: "Выполните команду: tail -n 20 /etc/ast.conf", commands: ['tail -n 20 /etc/ast.conf']}
+    ];
+
+    // Обновлённые симулированные выводы (более подробные)
+    const simulatedOutputs = {
+        'cat /etc/network/interfaces':
+            "auto eth0\n" +
+            "iface eth0 inet dhcp\n" +
+            "# Sample network configuration file\n" +
+            "auto wlan0\n" +
+            "iface wlan0 inet static\n" +
+            "    address 192.168.1.100\n" +
+            "    netmask 255.255.255.0\n" +
+            "    gateway 192.168.1.1\n" +
+            "# End of interfaces file.",
+        'grep "enable_firewall" /etc/ast.conf':
+            "# Firewall configuration\n" +
+            "enable_firewall = yes\n" +
+            "# End of configuration",
+        'head -n 20 /etc/ast.conf':
+            "1: network_mode=auto\n" +
+            "2: enable_firewall=yes\n" +
+            "3: default_gateway=192.168.1.1\n" +
+            "4: dns_server=8.8.8.8\n" +
+            "5: log_level=info\n" +
+            "6: timeout=30\n" +
+            "7: retry=3\n" +
+            "8: max_connections=100\n" +
+            "9: ssl_enabled=yes\n" +
+            "10: certificate=/etc/ssl/cert.pem\n" +
+            "11: key=/etc/ssl/key.pem\n" +
+            "12: interface=eth0\n" +
+            "13: dhcp_enabled=no\n" +
+            "14: static_ip=192.168.1.100\n" +
+            "15: netmask=255.255.255.0\n" +
+            "16: broadcast=192.168.1.255\n" +
+            "17: mtu=1500\n" +
+            "18: vlan_enabled=no\n" +
+            "19: proxy_enabled=no\n" +
+            "20: reserved=none",
+        'tail -n 20 /etc/ast.conf':
+            "81: param81=value81\n" +
+            "82: param82=value82\n" +
+            "83: param83=value83\n" +
+            "84: param84=value84\n" +
+            "85: param85=value85\n" +
+            "86: param86=value86\n" +
+            "87: param87=value87\n" +
+            "88: param88=value88\n" +
+            "89: param89=value89\n" +
+            "90: param90=value90\n" +
+            "91: param91=value91\n" +
+            "92: param92=value92\n" +
+            "93: param93=value93\n" +
+            "94: param94=value94\n" +
+            "95: param95=value95\n" +
+            "96: param96=value96\n" +
+            "97: param97=value97\n" +
+            "98: param98=value98\n" +
+            "99: param99=value99\n" +
+            "100: param100=value100"
+    };
+
+    // Краткие описания для модальных окон
+    const commandDescriptions = {
+        'cat /etc/network/interfaces': "Команда cat выводит содержимое файла /etc/network/interfaces, показывая настройки сетевых интерфейсов.",
+        'grep "enable_firewall" /etc/ast.conf': "Команда grep ищет параметр enable_firewall в файле /etc/ast.conf. Когда вы выполняете эту команду, она выводит все строки, в которых встречается параметр enable_firewall. Это полезно для быстрой проверки, какой статус (например, yes или no) присвоен этому параметру, и помогает убедиться, что файрволл включён или отключён.",
+        'head -n 20 /etc/ast.conf': "Команда head выводит первые 20 строк файла /etc/ast.conf, позволяя увидеть верхнюю часть конфигурации.",
+        'tail -n 20 /etc/ast.conf': "Команда tail выводит последние 20 строк файла /etc/ast.conf, что помогает проверить нижнюю часть файла."
+    };
+
+    let currentTaskIndex = 0;
+
+    function renderTasks() {
+        const container = document.getElementById("task-container");
+        container.innerHTML = "";
+        tasks.forEach((task, index) => {
+            let div = document.createElement("div");
+            div.className = "task";
+            if (index === currentTaskIndex) {
+                div.classList.add("active");
+            }
+            if (task.completed) {
+                div.classList.add("completed");
+            }
+            div.textContent = task.description;
+            container.appendChild(div);
+        });
     }
-  }
 
-  function showTaskCompleteModal(taskId) {
-    const task = tasks.find(task => task.id === taskId);
-    if (!task) return;
-    const cmd = task.commands[0];
-    const description = commandDescriptions[cmd] || "";
-    document.getElementById("taskCompleteMessage").textContent = "Поздравляем! Вы выполнили команду.\n" + description;
-    document.getElementById("taskCompleteOverlay").style.display = "flex";
-  }
-
-  document.getElementById("taskNextButton").addEventListener("click", function() {
-    document.getElementById("taskCompleteOverlay").style.display = "none";
-    // Очищаем терминал перед следующим заданием
-    document.getElementById("terminal-output").innerHTML = "";
-    currentTaskIndex++;
-    if (currentTaskIndex < tasks.length) {
-      renderTasks();
-      appendOutput("\nСледующее задание: " + tasks[currentTaskIndex].description, "congrats");
-    } else {
-      appendOutput("\nПоздравляем, все задания выполнены!", "congrats");
-      sendCompletionStatus();
-      showWinModal();
+    function completeTask(taskId) {
+        const t = tasks.find(task => task.id === taskId);
+        if (t && !t.completed) {
+            t.completed = true;
+            renderTasks();
+            setTimeout(() => {
+                showTaskCompleteModal(taskId);
+            }, 1000);
+        }
     }
-  });
 
-  renderTasks();
-
-  function appendOutput(text, cssClass = "") {
-    const outputDiv = document.getElementById("terminal-output");
-    let line = document.createElement("div");
-    line.className = "output " + cssClass;
-    line.textContent = text;
-    outputDiv.appendChild(line);
-    const terminal = document.getElementById("terminal");
-    terminal.scrollTop = terminal.scrollHeight;
-  }
-
-  document.getElementById("terminal-input").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      processCommand(this.value);
-      this.value = "";
+    function showTaskCompleteModal(taskId) {
+        const task = tasks.find(task => task.id === taskId);
+        if (!task) return;
+        const cmd = task.commands[0];
+        const description = commandDescriptions[cmd] || "";
+        document.getElementById("taskCompleteMessage").textContent = "Поздравляем! Вы выполнили команду.\n" + description;
+        document.getElementById("taskCompleteOverlay").style.display = "flex";
     }
-  });
 
-  function processCommand(command) {
-    command = command.trim();
-    if (!command) return;
-    appendOutput(document.getElementById("prompt").textContent + " " + command);
-    const expected = tasks[currentTaskIndex].commands[0];
-    if (command.toLowerCase() === expected.toLowerCase()) {
-      let simOutput = simulatedOutputs[expected.toLowerCase()] || "";
-      appendOutput(simOutput);
-      setTimeout(() => {
-          appendOutput("Команда выполнена верно!", "congrats");
-          completeTask(tasks[currentTaskIndex].id);
-      }, 2000);
-    } else {
-      appendOutput("Неверная команда. Попробуйте ещё раз.", "congrats");
+    document.getElementById("taskNextButton").addEventListener("click", function () {
+        document.getElementById("taskCompleteOverlay").style.display = "none";
+        // Очищаем терминал перед следующим заданием
+        document.getElementById("terminal-output").innerHTML = "";
+        currentTaskIndex++;
+        if (currentTaskIndex < tasks.length) {
+            renderTasks();
+            appendOutput("\nСледующее задание: " + tasks[currentTaskIndex].description, "congrats");
+        } else {
+            appendOutput("\nПоздравляем, все задания выполнены!", "congrats");
+            sendCompletionStatus();
+            showWinModal();
+        }
+    });
+
+    renderTasks();
+
+    function appendOutput(text, cssClass = "") {
+        const outputDiv = document.getElementById("terminal-output");
+        let line = document.createElement("div");
+        line.className = "output " + cssClass;
+        line.textContent = text;
+        outputDiv.appendChild(line);
+        const terminal = document.getElementById("terminal");
+        terminal.scrollTop = terminal.scrollHeight;
     }
-  }
 
-  // Модальное окно победы
-  function showWinModal() {
-    document.getElementById('win-overlay').style.display = 'flex';
-  }
+    document.getElementById("terminal-input").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            processCommand(this.value);
+            this.value = "";
+        }
+    });
+
+    function processCommand(command) {
+        command = command.trim();
+        if (!command) return;
+        appendOutput(document.getElementById("prompt").textContent + " " + command);
+        const expected = tasks[currentTaskIndex].commands[0];
+        if (command.toLowerCase() === expected.toLowerCase()) {
+            let simOutput = simulatedOutputs[expected.toLowerCase()] || "";
+            appendOutput(simOutput);
+            setTimeout(() => {
+                appendOutput("Команда выполнена верно!", "congrats");
+                completeTask(tasks[currentTaskIndex].id);
+            }, 2000);
+        } else {
+            appendOutput("Неверная команда. Попробуйте ещё раз.", "congrats");
+        }
+    }
+
+    // Модальное окно победы
+    function showWinModal() {
+        document.getElementById('win-overlay').style.display = 'flex';
+    }
 
 </script>
 </body>

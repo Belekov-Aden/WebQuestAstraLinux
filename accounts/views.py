@@ -185,6 +185,7 @@ def save_quiz_result_five(request):
             QuizResult.objects.create(
                 user=user,
                 step=step,
+                score=completed
             )
             message = "Результат сохранён"
 
