@@ -260,8 +260,10 @@
     <div class="sidebar">
         <div class="sidebar-content">
             <h3>Имя: {{ request.user.username }}</h3>
-            <p>Пройденные этапы:</p>
-            <ul>
+            {% if all_results %}
+                <p>Пройденные этапы:</p>
+                <ul>
+
                 {% for stat in all_results %}
                     <li>
                         <span>Этап: {{ stat.step }}</span>
@@ -274,6 +276,10 @@
                         {% endif %}
                     </li>
                 {% endfor %}
+            {% else %}
+                <p>Вы не прошли ни одного этапа!</p>
+
+            {% endif %}
             </ul>
         </div>
     </div>
