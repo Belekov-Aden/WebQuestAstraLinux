@@ -245,12 +245,27 @@
         displayScenario();
     }
 
+    function saveQuizResult(score) {
+        fetch("/save_quiz_result_one/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({score: score, total_questions: 3, step: 6})
+        })
+            .then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error("Ошибка:", error));
+    }
+
     // Функция для отображения финального результата
     function showFinalResult() {
         document.getElementById("scenario-container").style.display = "none";
         document.getElementById("result-container").style.display = "block";
         document.getElementById("final-result").textContent = `Вы ответили правильно на ${score} из ${scenarios.length} вопросов.`;
+        saveQuizResult(score);
     }
+
 
     function restartQuiz() {
         currentScenarioIndex = 0;
