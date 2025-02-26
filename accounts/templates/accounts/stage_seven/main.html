@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Рабочий стол Astra Linux – Демонстрация панели и иконок</title>
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="{% static 'accounts/css/stage_seven.css' %}">
+</head>
+<body>
+<!-- Верхняя панель (можно оставить, если нужно) -->
+<div class="top-panel">
+    <div class="panel-left">
+        Astra Linux – Рабочий стол
+    </div>
+    <div class="panel-right">
+        <a href="{% url 'map' %}" class="back">
+            <img src="{% static 'accounts/img/back.png' %}" alt="Back">
+        </a>
+    </div>
+</div>
+
+<!-- Рабочий стол -->
+<div class="desktop" id="desktop">
+    <!-- Пример новых иконок (аналогично тому, что в Astra Linux) -->
+    <div class="icon" data-name="Web-браузер Firefox">
+        <img src="{% static 'accounts/img/firefox.png' %}" alt="Firefox">
+        <span>Firefox</span>
+    </div>
+    <div class="icon" data-name="Файловый менеджер">
+        <img src="{% static 'accounts/img/file.png' %}" alt="File Manager">
+        <span>Файловый менеджер</span>
+    </div>
+    <div class="icon" data-name="Мой компьютер">
+        <img src="{% static 'accounts/img/desktop-icon.png' %}" alt="My Computer">
+        <span>Мой компьютер</span>
+    </div>
+    <div class="icon" data-name="Корзина">
+        <img src="https://cdn-icons-png.flaticon.com/512/3405/3405244.png" alt="Trash">
+        <span>Корзина</span>
+    </div>
+</div>
+
+<!-- Меню рабочего стола -->
+<div id="desktopMenu">
+    <ul>
+        <li class="disabled">Перерисовать экран</li>
+        <li class="disabled">Рабочий стол</li>
+        <hr>
+        <li class="disabled">Обновить иконки</li>
+        <li class="disabled">Выровнять по сетке</li>
+        <li class="disabled">Упорядочить в колонки</li>
+        <hr>
+        <li class="disabled">Окна каскадом</li>
+        <li class="disabled">Сверху вниз</li>
+        <li class="disabled">Слева направо</li>
+        <li class="disabled">Матричный</li>
+        <hr>
+        <li class="disabled">Закрыть все</li>
+        <li class="disabled">Свернуть-развернуть все</li>
+        <hr>
+        <li class="disabled">Вставить</li>
+        <li class="disabled">Панель задач</li>
+        <li class="disabled">Переключать столбов</li>
+        <hr>
+        <!-- Пункт "Создать" -->
+        <li id="menuCreate">Создать
+            <ul class="submenu-list" id="submenuCreate">
+                <li onclick="createItem('folder')">Папка</li>
+                <li onclick="createItem('textfile')">Текстовый файл</li>
+                <li class="disabled">Ярлык</li>
+                <hr>
+                <li onclick="createItem('libre-draw')">Рисунок LibreOffice</li>
+                <li onclick="createItem('libre-present')">Презентация LibreOffice</li>
+                <li onclick="createItem('libre-sheet')">Таблица LibreOffice</li>
+                <li onclick="createItem('libre-doc')">Документ LibreOffice</li>
+            </ul>
+        </li>
+        <hr>
+        <li class="disabled">Свойства...</li>
+    </ul>
+</div>
+
+<!-- Меню предмета (файла/папки) -->
+<div id="itemMenu">
+    <ul>
+        <li class="disabled">Открыть</li>
+        <li onclick="renameItem()">Переименовать</li>
+        <li onclick="deleteItem()">Удалить</li>
+        <hr>
+        <li class="disabled">Свойства</li>
+    </ul>
+</div>
+
+<!-- Панель наград (пример из предыдущего кода) -->
+<div class="awards-panel" id="awardsPanel">
+    <div class="award" data-award="Бейджик Инициации">
+        <img src="{% static 'accounts/img/Звезда.png' %}" alt="Бейджик Инициации">
+        <span>Бейджик Инициации</span>
+    </div>
+    <div class="award" data-award="Токен Командной Строки">
+        <img src="{% static 'accounts/img/Звезда.png' %}" alt="Токен Командной Строки">
+        <span>Токен Командной Строки</span>
+    </div>
+    <div class="award" data-award="Файл Знаний">
+        <img src="{% static 'accounts/img/Звезда.png' %}" alt="Файл Знаний">
+        <span>Файл Знаний</span>
+    </div>
+    <div class="award" data-award="Щит Безопасности">
+        <img src="{% static 'accounts/img/Звезда.png' %}" alt="Щит Безопасности">
+        <span>Щит Безопасности</span>
+    </div>
+    <div class="award" data-award="Ключ Настройки">
+        <img src="{% static 'accounts/img/Звезда.png' %}" alt="Ключ Настройки">
+        <span>Ключ Настройки</span>
+    </div>
+    <div class="award" data-award="Оптимизирующий Бейдж">
+        <img src="{% static 'accounts/img/Звезда.png' %}" alt="Оптимизирующий Бейдж">
+        <span>Оптимизирующий Бейдж</span>
+    </div>
+</div>
+
+<!-- Оверлей помощника -->
+<div class="assistant-overlay" id="assistantOverlay">
+    <div class="assistant-window">
+        <img src="{% static 'accounts/img/Радость.png' %}" alt="Помощник" class="assistant-img">
+        <div class="assistant-text" id="assistantText">
+            <!-- Здесь будет текст помощника -->
+        </div>
+        <div class="assistant-buttons">
+            <button onclick="closeAssistant()">OK</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Новая нижняя панель -->
+<div class="bottom-panel">
+    <div class="bottom-panel-left">
+        <!-- "Кнопка меню" или "логотип Astra" -->
+        <div class="panel-button">
+            <img src="https://cdn-icons-png.flaticon.com/512/566/566004.png" alt="Astra Menu">
+        </div>
+        <!-- Можно добавить закреплённые приложения -->
+        <div class="panel-button">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968282.png" alt="Firefox">
+        </div>
+        <div class="panel-button">
+            <img src="https://cdn-icons-png.flaticon.com/512/741/741400.png" alt="File Manager">
+        </div>
+    </div>
+    <div class="bottom-panel-right">
+        <!-- Пример иконок системного трея -->
+        <div class="panel-tray">
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828598.png" alt="Volume">
+            <img src="https://cdn-icons-png.flaticon.com/512/130/130188.png" alt="Network">
+            <span class="tray-clock" id="trayClock">14:35</span>
+        </div>
+    </div>
+</div>
+
+<!-- Финальное уведомление -->
+<div class="final-overlay" id="finalOverlay">
+    <div class="final-message">
+        <h2>Поздравляем! Вы завершили испытание!</h2>
+        <p>Вы выполнили все необходимые действия.</p>
+        <a href="{% url 'map' %}" class="btn transition">Продолжить</a>
+    </div>
+</div>
+
+<!-- Кастомный диалог -->
+<div class="dialog-overlay" id="dialogOverlay">
+    <div class="dialog-window">
+        <h2 id="dialogTitle">Подтверждение</h2>
+        <p id="dialogMessage"></p>
+        <input type="text" id="dialogInput"
+               style="display: none; width: 100%; box-sizing: border-box; padding: 5px; margin-bottom: 10px;">
+        <div class="dialog-buttons" id="dialogButtons"></div>
+    </div>
+</div>
+
+<!-- Подключаем скрипт -->
+<script src="{% static 'accounts/js/stage_seven.js' %}"></script>
+</body>
+</html>

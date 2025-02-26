@@ -1,0 +1,474 @@
+/* Сброс базовых отступов */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Фон рабочего стола */
+body {
+    font-family: Arial, sans-serif;
+    background: url("../img/os-astra-linux-blue.jpg") no-repeat center center fixed;
+    background-size: cover;
+    overflow: hidden;
+}
+
+/* Верхняя панель */
+.top-panel {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+}
+
+.top-panel .panel-left {
+    color: #fff;
+    font-size: 14px;
+}
+
+.top-panel .panel-right a.back img {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
+/* ===== Нижняя панель (Bottom Panel) ===== */
+.bottom-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 9999;
+}
+
+.bottom-panel-left,
+.bottom-panel-right {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.bottom-panel-left {
+    margin-left: 10px;
+}
+
+.bottom-panel-right {
+    margin-right: 10px;
+}
+
+.panel-button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: background 0.3s;
+}
+
+.panel-button img {
+    width: 24px;
+    height: 24px;
+}
+
+.panel-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.panel-tray img {
+    width: 24px;
+    height: 24px;
+    margin: 0 4px;
+    cursor: pointer;
+}
+
+.tray-clock {
+    margin-left: 8px;
+    color: #fff;
+    font-weight: bold;
+}
+.desktop {
+    position: absolute;
+    top: 40px;       /* если есть верхняя панель */
+    bottom: 40px;    /* если есть нижняя панель */
+    left: 0;
+    right: 0;
+    padding: 20px;
+
+    /* Настраиваем Grid */
+    display: grid;
+    /* Говорим: "Заполняем колонки", т.е. сначала столбец сверху вниз, потом следующий столбец */
+    grid-auto-flow: column;
+
+    /* Каждая колонка будет фиксированной ширины (80px),
+       а высота строк — 110px (чтобы хватило под иконку + подпись). */
+    grid-auto-columns: 80px;
+    grid-template-rows: repeat(auto-fill, 110px);
+
+    gap: 10px;          /* отступ между иконками по горизонтали и вертикали */
+    overflow: auto;     /* при избытке иконок добавляется прокрутка
+                           (горизонтальная, если столбцов станет слишком много) */
+}
+
+/* Стили иконки, чтобы занимать ровно ячейку 80×110 (минус gap) */
+/* Обычное состояние иконки */
+.icon {
+    width: 80px;
+    height: 100px;                 /* Фиксированная высота в обычном режиме */
+    border: 2px solid transparent; /* Та же толщина, но прозрачная */
+    box-sizing: border-box;        /* Чтобы бордюр и padding учитывались в width/height */
+    padding: 4px;                  /* Отступ от рамки */
+    overflow: hidden;              /* Обрезаем, если текст не влезает */
+    text-align: center;
+    transition: height 0.3s;       /* Опционально, плавная анимация изменения высоты */
+}
+
+/* Картинка внутри иконки */
+.icon img {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Подпись под иконкой */
+.icon span {
+    display: block;
+    margin-top: 4px;
+    color: #fff;
+    white-space: nowrap;       /* Одна строка */
+    text-overflow: ellipsis;   /* Многоточие при обрезке */
+    overflow: hidden;          /* Скрываем «выступающий» текст */
+}
+
+/* Расширенное состояние (при клике добавляем .expanded) */
+.icon.expanded {
+    height: auto;              /* Позволяем иконке увеличиваться по высоте */
+    border-color: #f4d03f;     /* Меняем только цвет бордюра, толщина остаётся 2px */
+    overflow: visible;         /* Теперь не обрезаем содержимое */
+}
+
+/* Убираем обрезку, разрешаем переносы */
+.icon.expanded span {
+    white-space: normal;
+    margin-top: 4px;
+    text-overflow: clip;
+    overflow: visible;
+}
+
+
+
+.icon.selected {
+    border: 2px solid #f4d03f;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== Меню рабочего стола (#desktopMenu) ===== */
+#desktopMenu {
+    position: absolute;
+    display: none;
+    background: rgba(60, 100, 150, 0.9);
+    color: #fff;
+    border: 1px solid #999;
+    border-radius: 4px;
+    z-index: 99999;
+    font-size: 14px;
+}
+
+#desktopMenu ul {
+    list-style: none;
+    margin: 0;
+    padding: 5px 0;
+}
+
+#desktopMenu li {
+    padding: 5px 10px;
+    white-space: nowrap;
+    cursor: default;
+    position: relative;
+}
+
+#desktopMenu li:not(.disabled):hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#desktopMenu hr {
+    border: none;
+    border-top: 1px solid #aaa;
+    margin: 5px 0;
+}
+
+.disabled {
+    color: #aaa;
+    pointer-events: none;
+}
+
+/* Подменю "Создать" */
+.submenu-list {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    display: none;
+    background: rgba(60, 100, 150, 0.9);
+    border: 1px solid #999;
+    border-radius: 4px;
+    min-width: 200px;
+    list-style: none;
+    padding: 5px 0;
+    z-index: 999999;
+}
+
+.submenu-list li {
+    padding: 5px 10px;
+    white-space: nowrap;
+    cursor: default;
+}
+
+.submenu-list li:not(.disabled):hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== Меню предмета (#itemMenu) ===== */
+#itemMenu {
+    position: absolute;
+    display: none;
+    background: rgba(60, 100, 150, 0.9);
+    color: #fff;
+    border: 1px solid #999;
+    border-radius: 4px;
+    min-width: 180px;
+    z-index: 99999;
+    font-size: 14px;
+}
+
+#itemMenu ul {
+    list-style: none;
+    margin: 0;
+    padding: 5px 0;
+}
+
+#itemMenu li {
+    padding: 5px 10px;
+    white-space: nowrap;
+    cursor: default;
+}
+
+#itemMenu li:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#itemMenu hr {
+    border: none;
+    border-top: 1px solid #aaa;
+    margin: 5px 0;
+}
+
+/* ===== Полупрозрачный блок со списком заданий ===== */
+/* Если ранее использовался tasks-panel, его можно отключить или удалить */
+
+/* ===== Панель наград ===== */
+.awards-panel {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    width: 240px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    padding: 10px;
+    color: #fff;
+    z-index: 9999;
+    font-size: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.awards-panel .award {
+    text-align: center;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.awards-panel .award img {
+    width: 64px;
+    height: 64px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+.awards-panel .award:hover img {
+    border-color: #f4d03f;
+}
+
+.awards-panel .award span {
+    display: block;
+    margin-top: 4px;
+}
+
+/* ===== Финальное уведомление ===== */
+.final-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+}
+
+.final-message {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    width: 300px;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.final-message h2 {
+    margin-bottom: 20px;
+}
+
+.final-message a.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #f4d03f;
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.final-message a.btn:hover {
+    background: #f1c40f;
+}
+
+/* ===== Кастомные диалоги ===== */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+}
+
+.dialog-window {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    width: 400px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.dialog-window h2 {
+    margin-bottom: 10px;
+}
+
+.dialog-window p {
+    margin-bottom: 10px;
+}
+
+.dialog-buttons {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.dialog-buttons button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+}
+
+.dialog-buttons .ok-btn {
+    background: #1e3a8a;
+    color: #fff;
+}
+
+.dialog-buttons .cancel-btn,
+.dialog-buttons .no-btn {
+    background: #ccc;
+    color: #333;
+}
+
+.dialog-buttons .yes-btn {
+    background: #f44336;
+    color: #fff;
+}
+
+/* Оверлей, закрывающий весь экран */
+.assistant-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none; /* Скрыто по умолчанию */
+    align-items: center;
+    justify-content: center;
+    z-index: 999999; /* Чтобы было поверх всего */
+}
+
+/* Окно помощника */
+.assistant-window {
+    position: relative;
+    background: #fff;
+    width: 400px;
+    max-width: 80%;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* Картинка помощника */
+.assistant-img {
+    width: 100px;
+    height: auto;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+/* Текст помощника */
+.assistant-text {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Кнопки под окном помощника */
+.assistant-buttons button {
+    padding: 8px 16px;
+    background: #1e3a8a;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.assistant-buttons button:hover {
+    background: #3b5998;
+}
