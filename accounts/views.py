@@ -61,8 +61,11 @@ def seven_levels(request):
     return render(request, 'accounts/seven_levels.html')
 
 
+@login_required
 def map(request):
-    return render(request, 'accounts/map.html')
+    usr = request.user
+    all_results = QuizResult.objects.filter(user=usr)
+    return render(request, 'accounts/map.html', {'all_results': all_results})
 
 
 def stage_one_main(request):
