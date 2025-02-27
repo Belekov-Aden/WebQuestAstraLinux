@@ -52,15 +52,9 @@
             cursor: pointer;
             border-radius: 5px;
         }
-        .blue-pill {
-            background: blue;
-        }
-        .red-pill {
-            background: red;
-        }
-        .green-pill {
-            background: #00f000;
-        }
+        .blue-pill { background: blue; }
+        .red-pill { background: red; }
+        .green-pill { background: #00f000; }
         .terminal-container {
             flex: 1;
             padding: 20px;
@@ -128,18 +122,10 @@
     </div>
 </div>
 
-<!-- Модальное окно проигрыша -->
-<div id="lose-overlay" class="modal-overlay" style="display:none;">
-    <div class="modal">
-        <p>У вас закончились попытки. Вы проиграли!</p>
-        <button id="lose-exit" class="pill-button green-pill">Выход</button>
-    </div>
-</div>
-
 <!-- Модальное окно победы -->
 <div id="win-overlay" class="modal-overlay" style="display:none;">
     <div class="modal">
-        <p>Поздравляем!!! Ты прошел второй этап, твоя награда - «Токен Командной Строки», подтверждающая освоение базового функционала терминала.</p>
+        <p>Поздравляем!!! Ты выполнил задание и подтвердил получение «Токена Командной Строки»!</p>
         <div class="pill-buttons">
             <button id="win-exit" class="pill-button green-pill">Вперед</button>
         </div>
@@ -161,23 +147,7 @@
 </div>
 
 <script>
-    // Функция для показа модального окна проигрыша
-    function showLoseModal() {
-        document.getElementById('lose-overlay').style.display = 'flex';
-    }
-    document.getElementById('lose-exit').addEventListener('click', function () {
-        window.location.href = "{% url 'stage_seven' %}";
-    });
-
-    // Функция для показа модального окна победы
-    function showWinModal() {
-        document.getElementById('win-overlay').style.display = 'flex';
-    }
-    document.getElementById('win-exit').addEventListener('click', function () {
-        window.location.href = "{% url 'stage_seven' %}";
-    });
-
-    // Кнопки выбора таблетки
+    // Кнопки
     document.getElementById('blue-pill').addEventListener('click', function () {
         window.location.href = "{% url 'stage_seven' %}";
     });
@@ -185,13 +155,51 @@
         document.getElementById('modal-overlay').style.display = 'none';
         document.getElementById("terminal-input").focus();
     });
+    document.getElementById('win-exit').addEventListener('click', function () {
+        window.location.href = "{% url 'stage_seven' %}";
+    });
 
-    // Пример файловой системы и терминальной логики (упрощенно)
+    // Файловая система
+    const fileSystem = {
+        "admpc@astra-2-12:~$": ["home", "var", "settings"],
+        "admpc@astra-2-12:~$home": ["students"],
+        "admpc@astra-2-12:~$home/students": ["student1.txt", "student2.txt", "student3.txt"],
+        "admpc@astra-2-12:~$settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
+        "admpc@astra-2-12:~$var": []
+    };
+
+    // Текущее расположение
     let currentDir = "admpc@astra-2-12:~$";
     function updatePrompt() {
         document.getElementById("prompt").textContent = currentDir + " $";
     }
     updatePrompt();
+
+    // Одно задание: ввести "ls /home/students"
+    const tasks = [
+        {
+            description: "Задание: Выполните команду ls /home/students для просмотра содержимого каталога.",
+            command: "ls /home/students"
+        }
+    ];
+    let currentTaskIndex = 0;
+
+    function renderTasks() {
+        const container = document.getElementById("task-container");
+        container.innerHTML = "";
+        tasks.forEach((task, index) => {
+            let div = document.createElement("div");
+            if (index === currentTaskIndex) {
+                div.className = "task active";
+                div.textContent = task.description;
+            } else {
+                div.className = "task";
+                div.textContent = task.description;
+            }
+            container.appendChild(div);
+        });
+    }
+    renderTasks();
 
     function appendOutput(text, cssClass = "") {
         const outputDiv = document.getElementById("terminal-output");
@@ -203,26 +211,69 @@
         terminal.scrollTop = terminal.scrollHeight;
     }
 
-    // Простейшая симуляция команд
+    // Проверка введённых команд
     function executeCommand(cmd) {
-        cmd = cmd.trim();
-        if (cmd.toLowerCase() === "pwd") {
+        cmd = cmd.trim().toLowerCase(); // Приводим команду к нижнему регистру и убираем лишние пробелы
+
+        // Проверка на ls /home/students
+        if (cmd.startsWith("ls /home/students")) {
+            // Сбрасываем флаг активности и устанавливаем флаг завершения
+            localStorage.removeItem("terminalTokenActive");
+            localStorage.setItem("terminalTokenCompleted", "true");
+            // Выводим содержимое каталога
+            let content = fileSystem["admpc@astra-2-12:~$home/students"].join("  ");
+            appendOutput("Содержимое каталога /home/students: " + content, "congrats");
+            // Показываем окно победы
+            showWinModal();
+            return "";
+        }
+
+        // Остальные команды
+        if (cmd === "pwd") {
             return currentDir;
-        } else if (cmd.toLowerCase().startsWith("ls")) {
-            // Проверка условия для Токена Командной Строки
-            if (localStorage.getItem("terminalTokenActive") === "true" && cmd.toLowerCase() === "ls") {
-                localStorage.removeItem("terminalTokenActive");
-                localStorage.setItem("terminalTokenCompleted", "true");
-                appendOutput("Поздравляем! Команда выполнена успешно!", "congrats");
-                showWinModal();
+        } else if (cmd.startsWith("ls")) {
+            if (fileSystem[currentDir] && fileSystem[currentDir].length > 0) {
+                return fileSystem[currentDir].join("  ");
+            } else {
+                return "Каталог пуст";
+            }
+        } else if (cmd.startsWith("cd ")) {
+            let newDir = cmd.slice(3).trim();
+            if (newDir === "/") {
+                currentDir = "admpc@astra-2-12:~$";
+                updatePrompt();
                 return "";
             }
-            return "Содержимое каталога: ..."; // Возвращаем некий результат ls
-        } else if (cmd.toLowerCase().startsWith("cd ")) {
-            // Простая смена директории
-            currentDir = "admpc@astra-2-12:~$" + cmd.slice(3).trim();
-            updatePrompt();
-            return "";
+            if (!newDir.startsWith("admpc@astra-2-12:~$")) {
+                if (currentDir.endsWith("/")) {
+                    newDir = currentDir + newDir;
+                } else {
+                    newDir = currentDir + "/" + newDir;
+                }
+            }
+            if (fileSystem[newDir] !== undefined) {
+                currentDir = newDir;
+                updatePrompt();
+                return "";
+            } else {
+                return "Нет такого каталога: " + newDir;
+            }
+        } else if (cmd.startsWith("mkdir ")) {
+            let folderName = cmd.slice(6).trim();
+            let newDir;
+            if (currentDir.endsWith("/")) {
+                newDir = currentDir + folderName;
+            } else {
+                newDir = currentDir + "/" + folderName;
+            }
+            if (fileSystem[currentDir] && fileSystem[currentDir].includes(folderName)) {
+                return "Папка уже существует: " + folderName;
+            } else {
+                if (!fileSystem[currentDir]) fileSystem[currentDir] = [];
+                fileSystem[currentDir].push(folderName);
+                fileSystem[newDir] = [];
+                return "";
+            }
         } else {
             return "Команда не найдена";
         }
@@ -238,6 +289,7 @@
         }
     }
 
+    // Обработка ввода
     document.getElementById("terminal-input").addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -245,6 +297,11 @@
             this.value = "";
         }
     });
+
+    // Показываем окно победы
+    function showWinModal() {
+        document.getElementById('win-overlay').style.display = 'flex';
+    }
 </script>
 </body>
 </html>
