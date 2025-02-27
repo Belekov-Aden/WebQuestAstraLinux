@@ -21,12 +21,18 @@ console.log("Script initialization started");
 // Объект с инструкциями для наград
 const rewardInstructions = {
     "Бейджик Инициации": "Поздравляю! Ты получил Бейджик Инициации за успешное прохождение первого этапа. Теперь начинается интерактивное испытание 'Операция Инициатива'. На твоём виртуальном рабочем столе спрятан секретный файл 'Initiative.txt'. Твоя задача – найти и открыть его, чтобы получить дальнейшие указания. Используй всё, что узнал на этапе знакомства с Astra Linux!",
-    "Токен Командной Строки": "На этапе 2 ты научился работать в терминале. Теперь попробуй выполнить команду 'ls' и изучи структуру файловой системы. Для вызова терминала используй сочетание клавиш 'ALT+T'.",
-    "Файл Знаний": "На этапе 3 ты собрал фрагменты документации. Твое задание: составь краткий конспект прочитанного материала.",
-    "Щит Безопасности": "На этапе 4 ты узнал об инструментах защиты. Теперь попробуй настроить файрволл и просмотреть логи безопасности.",
+    "Токен Командной Строки": "На этапе 2 ты научился работать в терминале. Теперь попробуй выполнить команду 'ls /home/students' и изучи структуру каталога. Для вызова терминала используй сочетание клавиш 'ALT+T'.",
+    "Файл Знаний": "Теперь твое задание: создайте новый файл, затем переименуйте его, а потом удалите с рабочего стола. Выполни эти действия – и награда 'Файл Знаний' будет получена!",
+    "Щит Безопасности": "Задание: Обновите антивирус. Дважды кликни по появившейся иконке антивируса, затем нажми кнопку 'Обновить', дождись заполнения progress bar, после чего введи надежный пароль (минимум 8 символов, с буквами, цифрами и знаками).",
     "Ключ Настройки": "На этапе 5 ты научился менять конфигурации системы. Твое задание: отредактируй конфигурационный файл и проверь результат.",
     "Оптимизирующий Бейдж": "На этапе 6 ты изучил методы оптимизации. Теперь оптимизируй работу системы, отключив неиспользуемые сервисы."
 };
+
+// Флаги для награды "Файл Знаний"
+let fileKnowledgeRewardActive = false;
+let fileCreationDone = false;
+let fileRenamingDone = false;
+let fileDeletionDone = false;
 
 // Переменная для выбранной иконки
 let selectedIcon = null;
@@ -40,7 +46,6 @@ let librePresentCount = 0;
 let libreSheetCount = 0;
 let libreDocCount = 0;
 
-// Инициализация: назначение обработчиков для уже существующих иконок и панели наград
 document.addEventListener('DOMContentLoaded', () => {
     initIconsEvents();
     initAwards(); // Инициализация наград
@@ -56,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ========== МЕНЮ РАБОЧЕГО СТОЛА ========== */
-// При правом клике на пустой области рабочего стола
 desktop.addEventListener('contextmenu', function (e) {
     const iconEl = e.target.closest('.icon');
     if (!iconEl) {
@@ -70,7 +74,6 @@ desktop.addEventListener('contextmenu', function (e) {
     }
 });
 
-// Скрывать меню при клике вне их области
 document.addEventListener('click', function (e) {
     if (!desktopMenu.contains(e.target)) {
         hideAllMenus();
@@ -80,7 +83,6 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// Появление подменю «Создать» при наведении
 menuCreate.addEventListener('mouseenter', function () {
     showSubmenuCreate();
 });
@@ -88,7 +90,6 @@ menuCreate.addEventListener('mouseleave', function () {
     submenuCreate.style.display = 'none';
 });
 
-// Функция отображения контекстного меню рабочего стола с учетом границ окна
 function showDesktopMenu(x, y) {
     desktopMenu.style.display = 'block';
     desktopMenu.style.left = x + 'px';
@@ -102,7 +103,6 @@ function showDesktopMenu(x, y) {
     }
 }
 
-// Функция отображения подменю "Создать"
 function showSubmenuCreate() {
     submenuCreate.style.display = 'block';
     submenuCreate.style.left = '100%';
@@ -117,7 +117,6 @@ function showSubmenuCreate() {
     }
 }
 
-// Функция отображения меню предмета (иконки)
 function showItemMenu(x, y) {
     itemMenu.style.display = 'block';
     itemMenu.style.left = x + 'px';
@@ -131,7 +130,6 @@ function showItemMenu(x, y) {
     }
 }
 
-// Функция скрытия всех меню
 function hideAllMenus() {
     desktopMenu.style.display = 'none';
     submenuCreate.style.display = 'none';
@@ -146,14 +144,11 @@ function onIconLeftClick(e) {
     }
     selectedIcon = this;
     selectedIcon.classList.add('selected');
-
-    // Переключаем класс 'expanded' для текущей иконки
     if (selectedIcon.classList.contains('expanded')) {
         selectedIcon.classList.remove('expanded');
     } else {
         selectedIcon.classList.add('expanded');
     }
-
     hideAllMenus();
 }
 
@@ -172,20 +167,22 @@ function initIconsEvents() {
     icons.forEach(icon => {
         icon.addEventListener('click', onIconLeftClick);
         icon.addEventListener('contextmenu', onIconRightClick);
-        // Для секретного файла: двойной клик
+        // Если это секретный файл, уже есть обработчик двойного клика
         icon.addEventListener('dblclick', function(e) {
             if (this.dataset.name === "Initiative.txt") {
                 handleSecretFileClick();
+            }
+            // Если это антивирус, обрабатываем двойной клик отдельно
+            else if (this.dataset.name === "Антивирус") {
+                handleAntivirusDoubleClick();
             }
         });
     });
 }
 
-// Функция создания нового элемента (Grid/Flex размещает ярлыки)
 function createItem(type) {
     let iconURL = '';
     let label = '';
-
     switch (type) {
         case 'folder':
             folderCount++;
@@ -220,31 +217,28 @@ function createItem(type) {
         default:
             return;
     }
-
     const iconDiv = document.createElement('div');
     iconDiv.className = 'icon';
     iconDiv.setAttribute('data-name', label);
-    iconDiv.title = label;  // Показываем нативную подсказку при наведении
-
+    iconDiv.title = label;
     const img = document.createElement('img');
     img.src = iconURL;
-
     const span = document.createElement('span');
     span.textContent = label;
-
     iconDiv.appendChild(img);
     iconDiv.appendChild(span);
     desktop.appendChild(iconDiv);
-
     iconDiv.addEventListener('click', onIconLeftClick);
     iconDiv.addEventListener('contextmenu', onIconRightClick);
-
     console.log("New item created:", label);
-
+    // Если награда "Файл Знаний" активна, регистрируем факт создания файла
+    if (fileKnowledgeRewardActive && !fileCreationDone) {
+        fileCreationDone = true;
+        checkFileKnowledgeRewardComplete();
+    }
     hideAllMenus();
 }
 
-/* ========== ДЕЙСТВИЯ С ПРЕДМЕТОМ: ПЕРЕИМЕНОВАНИЕ И УДАЛЕНИЕ ========== */
 function renameItem() {
     if (!selectedIcon) return;
     const oldName = selectedIcon.getAttribute('data-name') || 'Безымянный';
@@ -257,6 +251,11 @@ function renameItem() {
             if (newVal && newVal.trim() !== '') {
                 selectedIcon.setAttribute('data-name', newVal.trim());
                 selectedIcon.querySelector('span').textContent = newVal.trim();
+                // Если награда "Файл Знаний" активна, регистрируем факт переименования
+                if (fileKnowledgeRewardActive && !fileRenamingDone) {
+                    fileRenamingDone = true;
+                    checkFileKnowledgeRewardComplete();
+                }
             }
         }
     });
@@ -273,6 +272,11 @@ function deleteItem() {
         onConfirm: () => {
             desktop.removeChild(selectedIcon);
             selectedIcon = null;
+            // Если награда "Файл Знаний" активна, регистрируем факт удаления файла
+            if (fileKnowledgeRewardActive && !fileDeletionDone) {
+                fileDeletionDone = true;
+                checkFileKnowledgeRewardComplete();
+            }
         }
     });
     hideAllMenus();
@@ -291,7 +295,6 @@ function showDialog({ title, message, type, defaultValue = '', onConfirm, onCanc
     dialogInput.style.display = 'none';
     dialogInput.value = '';
     dialogButtons.innerHTML = '';
-
     if (type === 'prompt') {
         dialogInput.style.display = 'block';
         dialogInput.value = defaultValue;
@@ -312,7 +315,19 @@ function showDialog({ title, message, type, defaultValue = '', onConfirm, onCanc
             if (onCancel) onCancel();
             closeDialog();
         });
-    } else {
+    }
+    // Добавляем новую ветку для типа 'update'
+    else if (type === 'update') {
+        createButton('Обновить', 'ok-btn', () => {
+            if (onConfirm) onConfirm();
+            closeDialog();
+        });
+        createButton('Отмена', 'cancel-btn', () => {
+            if (onCancel) onCancel();
+            closeDialog();
+        });
+    }
+    else {
         createButton('OK', 'ok-btn', () => {
             if (onConfirm) onConfirm();
             closeDialog();
@@ -345,7 +360,6 @@ function initAwards() {
         console.error("No awards found!");
         return;
     }
-
     awards.forEach(award => {
         award.style.pointerEvents = 'auto';
         award.addEventListener('click', function(e) {
@@ -353,7 +367,6 @@ function initAwards() {
             console.log("Award clicked:", this.dataset.award);
             const awardName = this.dataset.award;
             const instruction = rewardInstructions[awardName] || "Инструкции для этой награды пока не заданы.";
-
             // Если выбрана награда первой этапа, показываем секретный файл
             if (awardName === "Бейджик Инициации") {
                 const secretFile = document.querySelector('.secret-file');
@@ -372,13 +385,171 @@ function initAwards() {
                     console.log('Secret file position:', randomX, randomY);
                 }
             }
-            // Если выбрана награда второй этапа, активируем условие для терминала
+            // Если выбрана награда второй этапа
             else if (awardName === "Токен Командной Строки") {
                 localStorage.setItem("terminalTokenActive", "true");
+            }
+            // Если выбрана награда третьей этапа, активируем задание по файлам
+            else if (awardName === "Файл Знаний") {
+                fileKnowledgeRewardActive = true;
+                fileCreationDone = false;
+                fileRenamingDone = false;
+                fileDeletionDone = false;
+            }
+            // Если выбрана награда четвертой этапа (Щит Безопасности) – создаём иконку антивируса
+            else if (awardName === "Щит Безопасности") {
+                createAntivirusIcon();
             }
             showAssistant(instruction);
         });
     });
+}
+
+// Функция создания иконки антивируса на рабочем столе
+function createAntivirusIcon() {
+    // Если уже создан, не создаём повторно
+    if (document.getElementById('antivirus-icon')) return;
+
+    const antivirusIcon = document.createElement('div');
+    antivirusIcon.id = 'antivirus-icon';
+    antivirusIcon.className = 'icon';
+    antivirusIcon.setAttribute('data-name', 'Антивирус');
+    antivirusIcon.title = 'Антивирус';
+
+    const img = document.createElement('img');
+    img.src = "https://cdn-icons-png.flaticon.com/512/1995/1995574.png"; // пример иконки антивируса
+    const span = document.createElement('span');
+    span.textContent = 'Антивирус';
+
+    antivirusIcon.appendChild(img);
+    antivirusIcon.appendChild(span);
+
+    // Добавляем в конец рабочего стола (без position: absolute)
+    desktop.appendChild(antivirusIcon);
+
+    // Добавляем обработчики событий
+    antivirusIcon.addEventListener('click', onIconLeftClick);
+    antivirusIcon.addEventListener('contextmenu', onIconRightClick);
+    antivirusIcon.addEventListener('dblclick', handleAntivirusDoubleClick);
+
+    console.log("Antivirus icon created");
+}
+
+// Обработчик двойного клика по антивирусу
+function handleAntivirusDoubleClick() {
+    showDialog({
+        title: "Антивирус",
+        message: "Нажмите 'Обновить', чтобы начать обновление антивируса.",
+        type: 'update',
+        onConfirm: () => {
+            // Закрываем текущий диалог перед открытием нового
+            closeDialog();
+            showAntivirusProgress();
+        }
+    });
+}
+
+// Функция имитации заполнения progress bar для обновления антивируса
+function showAntivirusProgress() {
+    // Сбрасываем содержимое диалога
+    showDialog({
+        title: "Антивирус",
+        message: "Нажмите 'Обновить', чтобы начать обновление антивируса.",
+        type: 'update',
+        onConfirm: () => {
+            // Закрываем текущий диалог перед открытием нового
+            closeDialog();
+            showAntivirusPasswordDialog
+        }
+    });
+}
+
+// Запрос на ввод надежного пароля (окно не закрывается при неверном вводе)
+function showAntivirusPasswordDialog() {
+  // Настраиваем диалог вручную
+  dialogTitle.textContent = "Антивирус";
+  dialogMessage.textContent = "Введите надежный пароль (минимум 8 символов, с буквами, цифрами и знаком):";
+  dialogInput.style.display = 'block';
+  dialogInput.value = '';
+  dialogButtons.innerHTML = "";
+
+  // Создаем только кнопку OK; кнопка "Отмена" убрана, чтобы окно не закрывалось при неверном вводе
+  const okBtn = document.createElement('button');
+  okBtn.textContent = 'OK';
+  okBtn.className = 'ok-btn';
+  okBtn.addEventListener('click', () => {
+    const pwd = dialogInput.value.trim();
+    if (validatePassword(pwd)) {
+      const shieldAward = document.querySelector('[data-award="Щит Безопасности"]');
+      if (shieldAward) {
+        shieldAward.classList.add('correct');
+        shieldAward.classList.remove('incorrect');
+      }
+      closeDialog();
+      showAssistant("Обновление антивируса успешно завершено!");
+    } else {
+      // Если пароль не валиден, обновляем сообщение, окно остаётся открытым
+      dialogMessage.textContent = "Пароль ненадежный. Попробуйте ещё раз (минимум 8 символов, буквы, цифры и знак):";
+      dialogInput.value = "";
+    }
+  });
+  dialogButtons.appendChild(okBtn);
+
+  dialogOverlay.style.display = 'flex';
+}
+
+// Функция проверки надежности пароля
+function validatePassword(pwd) {
+  const minLength = 8;
+  const hasLetter = /[a-zA-Z]/.test(pwd);
+  const hasDigit = /[0-9]/.test(pwd);
+  const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+  return pwd.length >= minLength && hasLetter && hasDigit && hasSymbol;
+}
+
+// Функция запроса на ввод надежного пароля
+function promptAntivirusPassword() {
+    showDialog({
+        title: "Антивирус",
+        message: "Придумайте надежный пароль (минимум 8 символов, с буквами, цифрами и знаками):",
+        type: 'prompt',
+        defaultValue: '',
+        onConfirm: (password) => {
+            if (validatePassword(password)) {
+                const shieldAward = document.querySelector('[data-award="Щит Безопасности"]');
+                if (shieldAward) {
+                    shieldAward.classList.add('correct');
+                    shieldAward.classList.remove('incorrect');
+                }
+                showAssistant("Обновление антивируса успешно завершено!");
+            } else {
+                showAssistant("Пароль ненадежный. Попробуйте ещё раз.");
+                promptAntivirusPassword();
+            }
+        }
+    });
+}
+
+// Функция проверки надежности пароля
+function validatePassword(pwd) {
+    const minLength = 8;
+    const hasLetter = /[a-zA-Z]/.test(pwd);
+    const hasDigit = /[0-9]/.test(pwd);
+    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+    return pwd.length >= minLength && hasLetter && hasDigit && hasSymbol;
+}
+
+// Функция проверки выполнения всех действий для награды "Файл Знаний"
+function checkFileKnowledgeRewardComplete() {
+    if (fileCreationDone && fileRenamingDone && fileDeletionDone) {
+        const fileKnowledgeAward = document.querySelector('[data-award="Файл Знаний"]');
+        if (fileKnowledgeAward) {
+            fileKnowledgeAward.classList.add('correct');
+            fileKnowledgeAward.classList.remove('incorrect');
+        }
+        showAssistant("Поздравляем! Ты выполнил все действия: создание, переименование и удаление файлов.");
+        fileKnowledgeRewardActive = false;
+    }
 }
 
 // Функция показа помощника
@@ -414,7 +585,6 @@ function handleSecretFileClick() {
     });
 }
 
-// Обработчик клавиш для вызова терминала (Alt+T)
 document.addEventListener('keydown', function(e) {
     if (e.altKey && e.key.toLowerCase() === 't') {
         e.preventDefault();

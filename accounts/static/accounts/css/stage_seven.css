@@ -36,7 +36,7 @@ body {
     cursor: pointer;
 }
 
-/* Нижняя панель */
+/* ===== Нижняя панель (Bottom Panel) ===== */
 .bottom-panel {
     position: absolute;
     bottom: 0;
@@ -97,36 +97,43 @@ body {
     color: #fff;
     font-weight: bold;
 }
-
-/* Рабочий стол */
 .desktop {
     position: absolute;
-    top: 40px;
-    bottom: 40px;
+    top: 40px;       /* если есть верхняя панель */
+    bottom: 40px;    /* если есть нижняя панель */
     left: 0;
     right: 0;
     padding: 20px;
+
+    /* Настраиваем Grid */
     display: grid;
-    /* Заполнение столбцов сверху вниз, затем переход к следующей колонке */
+    /* Говорим: "Заполняем колонки", т.е. сначала столбец сверху вниз, потом следующий столбец */
     grid-auto-flow: column;
+
+    /* Каждая колонка будет фиксированной ширины (80px),
+       а высота строк — 110px (чтобы хватило под иконку + подпись). */
     grid-auto-columns: 80px;
     grid-template-rows: repeat(auto-fill, 110px);
-    gap: 10px;
-    overflow: auto;
+
+    gap: 10px;          /* отступ между иконками по горизонтали и вертикали */
+    overflow: auto;     /* при избытке иконок добавляется прокрутка
+                           (горизонтальная, если столбцов станет слишком много) */
 }
 
-/* Иконки */
+/* Стили иконки, чтобы занимать ровно ячейку 80×110 (минус gap) */
+/* Обычное состояние иконки */
 .icon {
     width: 80px;
-    height: 100px;
-    border: 2px solid transparent;
-    box-sizing: border-box;
-    padding: 4px;
-    overflow: hidden;
+    height: 100px;                 /* Фиксированная высота в обычном режиме */
+    border: 2px solid transparent; /* Та же толщина, но прозрачная */
+    box-sizing: border-box;        /* Чтобы бордюр и padding учитывались в width/height */
+    padding: 4px;                  /* Отступ от рамки */
+    overflow: hidden;              /* Обрезаем, если текст не влезает */
     text-align: center;
-    transition: height 0.3s, transform 0.2s;
+    transition: height 0.3s;       /* Опционально, плавная анимация изменения высоты */
 }
 
+/* Картинка внутри иконки */
 .icon img {
     width: 64px;
     height: 64px;
@@ -134,33 +141,39 @@ body {
     display: block;
 }
 
+/* Подпись под иконкой */
 .icon span {
     display: block;
     margin-top: 4px;
     color: #fff;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    white-space: nowrap;       /* Одна строка */
+    text-overflow: ellipsis;   /* Многоточие при обрезке */
+    overflow: hidden;          /* Скрываем «выступающий» текст */
 }
 
+/* Расширенное состояние (при клике добавляем .expanded) */
 .icon.expanded {
-    height: auto;
-    border-color: #f4d03f;
-    overflow: visible;
+    height: auto;              /* Позволяем иконке увеличиваться по высоте */
+    border-color: #f4d03f;     /* Меняем только цвет бордюра, толщина остаётся 2px */
+    overflow: visible;         /* Теперь не обрезаем содержимое */
 }
 
+/* Убираем обрезку, разрешаем переносы */
 .icon.expanded span {
     white-space: normal;
+    margin-top: 4px;
     text-overflow: clip;
     overflow: visible;
 }
+
+
 
 .icon.selected {
     border: 2px solid #f4d03f;
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Меню рабочего стола */
+/* ===== Меню рабочего стола (#desktopMenu) ===== */
 #desktopMenu {
     position: absolute;
     display: none;
@@ -225,7 +238,7 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Меню предмета */
+/* ===== Меню предмета (#itemMenu) ===== */
 #itemMenu {
     position: absolute;
     display: none;
@@ -260,7 +273,10 @@ body {
     margin: 5px 0;
 }
 
-/* Панель наград */
+/* ===== Полупрозрачный блок со списком заданий ===== */
+/* Если ранее использовался tasks-panel, его можно отключить или удалить */
+
+/* ===== Панель наград ===== */
 .awards-panel {
     position: absolute;
     top: 50px;
@@ -301,7 +317,7 @@ body {
     margin-top: 4px;
 }
 
-/* Финальное уведомление */
+/* ===== Финальное уведомление ===== */
 .final-overlay {
     position: fixed;
     top: 0;
@@ -343,7 +359,7 @@ body {
     background: #f1c40f;
 }
 
-/* Кастомные диалоги */
+/* ===== Кастомные диалоги ===== */
 .dialog-overlay {
     position: fixed;
     top: 0;
@@ -404,7 +420,7 @@ body {
     color: #fff;
 }
 
-/* Оверлей помощника */
+/* Оверлей, закрывающий весь экран */
 .assistant-overlay {
     position: fixed;
     top: 0;
@@ -412,12 +428,13 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    display: none;
+    display: none; /* Скрыто по умолчанию */
     align-items: center;
     justify-content: center;
-    z-index: 999999;
+    z-index: 999999; /* Чтобы было поверх всего */
 }
 
+/* Окно помощника */
 .assistant-window {
     position: relative;
     background: #fff;
@@ -428,6 +445,7 @@ body {
     text-align: center;
 }
 
+/* Картинка помощника */
 .assistant-img {
     width: 100px;
     height: auto;
@@ -435,12 +453,14 @@ body {
     margin-bottom: 10px;
 }
 
+/* Текст помощника */
 .assistant-text {
     font-size: 16px;
     color: #333;
     margin-bottom: 15px;
 }
 
+/* Кнопки под окном помощника */
 .assistant-buttons button {
     padding: 8px 16px;
     background: #1e3a8a;
@@ -449,14 +469,32 @@ body {
     border-radius: 4px;
     cursor: pointer;
 }
-
 .assistant-buttons button:hover {
     background: #3b5998;
 }
 
+
 /* Анимация для секретного файла */
 .glow {
     animation: glow 2s infinite alternate;
+}
+
+
+/* Активация элементов интерфейса */
+
+.icon {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.icon:hover {
+    transform: scale(1.05);
+}
+
+/* Добавить в конец CSS */
+.hidden-file.glow {
+    animation: glow 1s ease-in-out infinite alternate;
+    display: block !important;
 }
 
 @keyframes glow {
