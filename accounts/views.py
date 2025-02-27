@@ -213,3 +213,7 @@ def stage_seven(request):
 
 def stage_seven_terminal(request):
     return render(request, 'accounts/stage_seven/stage_seven_terminal.html')
+
+
+def stage_seven_conf(request):
+    return render(request, 'accounts/stage_seven/stage_seven_conf.html')
