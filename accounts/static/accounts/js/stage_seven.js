@@ -23,7 +23,7 @@ const rewardInstructions = {
     "Бейджик Инициации": "Поздравляю! Ты получил Бейджик Инициации за успешное прохождение первого этапа. Теперь начинается интерактивное испытание 'Операция Инициатива'. На твоём виртуальном рабочем столе спрятан секретный файл 'Initiative.txt'. Твоя задача – найти и открыть его, чтобы получить дальнейшие указания. Используй всё, что узнал на этапе знакомства с Astra Linux!",
     "Токен Командной Строки": "На этапе 2 ты научился работать в терминале. Теперь попробуй выполнить команду 'ls /home/students' и изучи структуру каталога. Для вызова терминала используй сочетание клавиш 'ALT+T'.",
     "Файл Знаний": "Теперь твое задание: создайте новый файл, затем переименуйте его, а потом удалите с рабочего стола. Выполни эти действия – и награда 'Файл Знаний' будет получена!",
-    "Щит Безопасности": "Задание: Обновите антивирус. Дважды кликни по появившейся иконке антивируса, затем нажми кнопку 'Обновить', дождись заполнения progress bar, после чего введи надежный пароль (минимум 8 символов, с буквами, цифрами и знаками).",
+    "Щит Безопасности": "Задание: Обновите антивирус. Дважды кликните по появившейся иконке антивируса, затем нажмите кнопку 'Обновить'. Подождите, пока в окне появится сообщение 'Идет процесс обновления...', после чего введите надежный пароль (минимум 8 символов, с буквами, цифрами и знаками).",
     "Ключ Настройки": "На этапе 5 ты научился менять конфигурации системы. Твое задание: отредактируй конфигурационный файл и проверь результат.",
     "Оптимизирующий Бейдж": "На этапе 6 ты изучил методы оптимизации. Теперь оптимизируй работу системы, отключив неиспользуемые сервисы."
 };
@@ -58,6 +58,16 @@ document.addEventListener('DOMContentLoaded', () => {
          }
          localStorage.removeItem("terminalTokenCompleted");
     }
+
+    if (localStorage.getItem("confCompleted") === "true") {
+        const configAward = document.querySelector('[data-award="Ключ Настройки"]');
+        if (configAward) {
+            configAward.classList.add("correct");
+            configAward.classList.remove("incorrect");
+        }
+        localStorage.removeItem("confCompleted");
+    }
+
 });
 
 /* ========== МЕНЮ РАБОЧЕГО СТОЛА ========== */
@@ -167,12 +177,11 @@ function initIconsEvents() {
     icons.forEach(icon => {
         icon.addEventListener('click', onIconLeftClick);
         icon.addEventListener('contextmenu', onIconRightClick);
-        // Если это секретный файл, уже есть обработчик двойного клика
+        // Если это секретный файл или антивирус, обрабатываем двойной клик
         icon.addEventListener('dblclick', function(e) {
             if (this.dataset.name === "Initiative.txt") {
                 handleSecretFileClick();
             }
-            // Если это антивирус, обрабатываем двойной клик отдельно
             else if (this.dataset.name === "Антивирус") {
                 handleAntivirusDoubleClick();
             }
@@ -315,19 +324,16 @@ function showDialog({ title, message, type, defaultValue = '', onConfirm, onCanc
             if (onCancel) onCancel();
             closeDialog();
         });
-    }
-    // Добавляем новую ветку для типа 'update'
-    else if (type === 'update') {
+    } else if (type === 'update') {
         createButton('Обновить', 'ok-btn', () => {
             if (onConfirm) onConfirm();
-            closeDialog();
+            // Не закрываем диалог сразу, чтобы можно было показать анимацию
         });
         createButton('Отмена', 'cancel-btn', () => {
             if (onCancel) onCancel();
             closeDialog();
         });
-    }
-    else {
+    } else {
         createButton('OK', 'ok-btn', () => {
             if (onConfirm) onConfirm();
             closeDialog();
@@ -367,7 +373,7 @@ function initAwards() {
             console.log("Award clicked:", this.dataset.award);
             const awardName = this.dataset.award;
             const instruction = rewardInstructions[awardName] || "Инструкции для этой награды пока не заданы.";
-            // Если выбрана награда первой этапа, показываем секретный файл
+            // Если награда первой этапа – секретный файл
             if (awardName === "Бейджик Инициации") {
                 const secretFile = document.querySelector('.secret-file');
                 if (secretFile) {
@@ -385,53 +391,91 @@ function initAwards() {
                     console.log('Secret file position:', randomX, randomY);
                 }
             }
-            // Если выбрана награда второй этапа
+            // Если награда второй этапа
             else if (awardName === "Токен Командной Строки") {
                 localStorage.setItem("terminalTokenActive", "true");
             }
-            // Если выбрана награда третьей этапа, активируем задание по файлам
+            // Если награда третьей этапа
             else if (awardName === "Файл Знаний") {
                 fileKnowledgeRewardActive = true;
                 fileCreationDone = false;
                 fileRenamingDone = false;
                 fileDeletionDone = false;
             }
-            // Если выбрана награда четвертой этапа (Щит Безопасности) – создаём иконку антивируса
+            // Если награда четвертой этапа – щит безопасности (антивирус)
             else if (awardName === "Щит Безопасности") {
                 createAntivirusIcon();
+            }
+            // Если выбрана награда "Ключ Настройки" (пятая награда)
+            else if (awardName === "Ключ Настройки") {
+                // Используем переменную confUrl, определённую в шаблоне
+                showAssistantWithRedirect(instruction, "Перейти", confUrl);
+                return;
+            }
+            // Если выбрана награда "Оптимизирующий Бейдж" (шестая награда)
+            else if (awardName === "Оптимизирующий Бейдж") {
+                handleOptimizationAssignment();
+                return;
             }
             showAssistant(instruction);
         });
     });
 }
 
-// Функция создания иконки антивируса на рабочем столе
-function createAntivirusIcon() {
-    // Если уже создан, не создаём повторно
-    if (document.getElementById('antivirus-icon')) return;
+/* ========== ЛОГИКА ДЛЯ "ФАЙЛ ЗНАНИЙ" ========== */
+function checkFileKnowledgeRewardComplete() {
+    if (fileCreationDone && fileRenamingDone && fileDeletionDone) {
+        const fileKnowledgeAward = document.querySelector('[data-award="Файл Знаний"]');
+        if (fileKnowledgeAward) {
+            fileKnowledgeAward.classList.add('correct');
+            fileKnowledgeAward.classList.remove('incorrect');
+        }
+        showAssistant("Поздравляем! Ты выполнил все действия: создание, переименование и удаление файла.");
+        fileKnowledgeRewardActive = false;
+    }
+}
 
+/* ========== НОВАЯ ФУНКЦИЯ: ПОКАЗ ПОДСКАЗКИ С ПЕРЕАДРЕСАЦИЕЙ ========== */
+function showAssistantWithRedirect(message, buttonText, redirectUrl) {
+    assistantText.textContent = message;
+    const buttonsContainer = document.querySelector('.assistant-buttons');
+    buttonsContainer.innerHTML = "";
+    const btn = document.createElement('button');
+    btn.textContent = buttonText;
+    btn.addEventListener('click', function() {
+         // Подсвечиваем награду "Ключ Настройки" зелёным
+         const configAward = document.querySelector('[data-award="Ключ Настройки"]');
+         if (configAward) {
+              configAward.classList.add("correct");
+              configAward.classList.remove("incorrect");
+         }
+         window.location.href = redirectUrl;
+    });
+    buttonsContainer.appendChild(btn);
+    assistantOverlay.style.display = 'flex';
+}
+
+
+/* ========== ЛОГИКА ДЛЯ "ЩИТ БЕЗОПАСНОСТИ" (АНТИВИРУС) ========== */
+// Создание иконки антивируса в конце списка
+function createAntivirusIcon() {
+    if (document.getElementById('antivirus-icon')) return;
     const antivirusIcon = document.createElement('div');
     antivirusIcon.id = 'antivirus-icon';
     antivirusIcon.className = 'icon';
     antivirusIcon.setAttribute('data-name', 'Антивирус');
     antivirusIcon.title = 'Антивирус';
-
     const img = document.createElement('img');
-    img.src = "https://cdn-icons-png.flaticon.com/512/1995/1995574.png"; // пример иконки антивируса
+    img.src = "https://cdn-icons-png.flaticon.com/512/1995/1995574.png";
     const span = document.createElement('span');
     span.textContent = 'Антивирус';
-
     antivirusIcon.appendChild(img);
     antivirusIcon.appendChild(span);
-
-    // Добавляем в конец рабочего стола (без position: absolute)
+    // Добавляем в конец рабочего стола (без absolute позиционирования)
     desktop.appendChild(antivirusIcon);
-
-    // Добавляем обработчики событий
     antivirusIcon.addEventListener('click', onIconLeftClick);
     antivirusIcon.addEventListener('contextmenu', onIconRightClick);
     antivirusIcon.addEventListener('dblclick', handleAntivirusDoubleClick);
-
     console.log("Antivirus icon created");
 }
 
@@ -442,92 +486,63 @@ function handleAntivirusDoubleClick() {
         message: "Нажмите 'Обновить', чтобы начать обновление антивируса.",
         type: 'update',
         onConfirm: () => {
-            // Закрываем текущий диалог перед открытием нового
             closeDialog();
-            showAntivirusProgress();
+            showAntivirusUpdatingAnimation();
         }
     });
 }
 
-// Функция имитации заполнения progress bar для обновления антивируса
-function showAntivirusProgress() {
-    // Сбрасываем содержимое диалога
-    showDialog({
-        title: "Антивирус",
-        message: "Нажмите 'Обновить', чтобы начать обновление антивируса.",
-        type: 'update',
-        onConfirm: () => {
-            // Закрываем текущий диалог перед открытием нового
-            closeDialog();
-            showAntivirusPasswordDialog
+// Функция имитации процесса обновления антивируса с анимацией бегущих точек
+function showAntivirusUpdatingAnimation() {
+    dialogTitle.textContent = "Обновление антивируса";
+    dialogMessage.textContent = "Идет процесс обновления";
+    dialogInput.style.display = 'none';
+    dialogButtons.innerHTML = "";
+    dialogOverlay.style.display = 'flex';
+
+    let dots = "";
+    const interval = setInterval(() => {
+        dots += ".";
+        if (dots.length > 3) {
+            dots = "";
         }
-    });
+        dialogMessage.textContent = "Идет процесс обновления" + dots;
+    }, 500);
+
+    // Через 3 секунды остановить анимацию и перейти к запросу пароля
+    setTimeout(() => {
+        clearInterval(interval);
+        showAntivirusPasswordDialog();
+    }, 3000);
 }
 
-// Запрос на ввод надежного пароля (окно не закрывается при неверном вводе)
+// Запрос на ввод надежного пароля; окно остаётся открытым при неверном вводе
 function showAntivirusPasswordDialog() {
-  // Настраиваем диалог вручную
-  dialogTitle.textContent = "Антивирус";
-  dialogMessage.textContent = "Введите надежный пароль (минимум 8 символов, с буквами, цифрами и знаком):";
-  dialogInput.style.display = 'block';
-  dialogInput.value = '';
-  dialogButtons.innerHTML = "";
-
-  // Создаем только кнопку OK; кнопка "Отмена" убрана, чтобы окно не закрывалось при неверном вводе
-  const okBtn = document.createElement('button');
-  okBtn.textContent = 'OK';
-  okBtn.className = 'ok-btn';
-  okBtn.addEventListener('click', () => {
-    const pwd = dialogInput.value.trim();
-    if (validatePassword(pwd)) {
-      const shieldAward = document.querySelector('[data-award="Щит Безопасности"]');
-      if (shieldAward) {
-        shieldAward.classList.add('correct');
-        shieldAward.classList.remove('incorrect');
-      }
-      closeDialog();
-      showAssistant("Обновление антивируса успешно завершено!");
-    } else {
-      // Если пароль не валиден, обновляем сообщение, окно остаётся открытым
-      dialogMessage.textContent = "Пароль ненадежный. Попробуйте ещё раз (минимум 8 символов, буквы, цифры и знак):";
-      dialogInput.value = "";
-    }
-  });
-  dialogButtons.appendChild(okBtn);
-
-  dialogOverlay.style.display = 'flex';
-}
-
-// Функция проверки надежности пароля
-function validatePassword(pwd) {
-  const minLength = 8;
-  const hasLetter = /[a-zA-Z]/.test(pwd);
-  const hasDigit = /[0-9]/.test(pwd);
-  const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
-  return pwd.length >= minLength && hasLetter && hasDigit && hasSymbol;
-}
-
-// Функция запроса на ввод надежного пароля
-function promptAntivirusPassword() {
-    showDialog({
-        title: "Антивирус",
-        message: "Придумайте надежный пароль (минимум 8 символов, с буквами, цифрами и знаками):",
-        type: 'prompt',
-        defaultValue: '',
-        onConfirm: (password) => {
-            if (validatePassword(password)) {
-                const shieldAward = document.querySelector('[data-award="Щит Безопасности"]');
-                if (shieldAward) {
-                    shieldAward.classList.add('correct');
-                    shieldAward.classList.remove('incorrect');
-                }
-                showAssistant("Обновление антивируса успешно завершено!");
-            } else {
-                showAssistant("Пароль ненадежный. Попробуйте ещё раз.");
-                promptAntivirusPassword();
+    dialogTitle.textContent = "Антивирус";
+    dialogMessage.textContent = "Введите надежный пароль (минимум 8 символов, с буквами, цифрами и знаком):";
+    dialogInput.style.display = 'block';
+    dialogInput.value = "";
+    dialogButtons.innerHTML = "";
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'OK';
+    okBtn.className = 'ok-btn';
+    okBtn.addEventListener('click', () => {
+        const pwd = dialogInput.value.trim();
+        if (validatePassword(pwd)) {
+            const shieldAward = document.querySelector('[data-award="Щит Безопасности"]');
+            if (shieldAward) {
+                shieldAward.classList.add('correct');
+                shieldAward.classList.remove('incorrect');
             }
+            closeDialog();
+            showAssistant("Обновление антивируса успешно завершено!");
+        } else {
+            dialogMessage.textContent = "Пароль ненадежный. Попробуйте ещё раз (минимум 8 символов, с буквами, цифрами и знаком):";
+            dialogInput.value = "";
         }
     });
+    dialogButtons.appendChild(okBtn);
+    dialogOverlay.style.display = 'flex';
 }
 
 // Функция проверки надежности пароля
@@ -539,29 +554,44 @@ function validatePassword(pwd) {
     return pwd.length >= minLength && hasLetter && hasDigit && hasSymbol;
 }
 
-// Функция проверки выполнения всех действий для награды "Файл Знаний"
-function checkFileKnowledgeRewardComplete() {
-    if (fileCreationDone && fileRenamingDone && fileDeletionDone) {
-        const fileKnowledgeAward = document.querySelector('[data-award="Файл Знаний"]');
-        if (fileKnowledgeAward) {
-            fileKnowledgeAward.classList.add('correct');
-            fileKnowledgeAward.classList.remove('incorrect');
+function handleOptimizationAssignment() {
+    // Открываем диалог с инструкцией к заданию
+    dialogTitle.textContent = "Оптимизация системы";
+    dialogMessage.textContent = "В системе запущены следующие службы: bluetooth, NetworkManager, cups, cron.\nОтключите те, которые не требуются для оптимальной работы (подсказка: bluetooth и cups обычно не нужны на сервере).\nВведите названия служб через пробел:";
+    dialogInput.style.display = 'block';
+    dialogInput.value = "";
+    dialogButtons.innerHTML = "";
+
+    // Создаем кнопку OK; окно не закрывается, если ответ неверный
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'OK';
+    okBtn.className = 'ok-btn';
+    okBtn.addEventListener('click', () => {
+        const input = dialogInput.value.trim();
+        // Разбиваем ввод по пробелам и приводим к нижнему регистру
+        const tokens = input.split(/\s+/).map(s => s.toLowerCase()).sort();
+        // Ожидаемый ответ: отключить "bluetooth" и "cups"
+        const correctTokens = ["bluetooth", "cups"].sort();
+        if (JSON.stringify(tokens) === JSON.stringify(correctTokens)) {
+            // Если ответ верный, подсвечиваем награду зелёным
+            const optimizeAward = document.querySelector('[data-award="Оптимизирующий Бейдж"]');
+            if (optimizeAward) {
+                optimizeAward.classList.add('correct');
+                optimizeAward.classList.remove('incorrect');
+            }
+            closeDialog();
+            showAssistant("Поздравляем! Отключение службы bluetooth уменьшает энергопотребление, а отключение CUPS избавляет от ненужного обслуживания печати – это повышает производительность и безопасность системы.");
+        } else {
+            // Если ответ неверный, обновляем сообщение и очищаем поле ввода для повторного ввода
+            dialogMessage.textContent = "Неверный ответ. Проверьте список служб и попробуйте ещё раз.\nПодсказка: отключите службы bluetooth и cups.";
+            dialogInput.value = "";
         }
-        showAssistant("Поздравляем! Ты выполнил все действия: создание, переименование и удаление файлов.");
-        fileKnowledgeRewardActive = false;
-    }
+    });
+    dialogButtons.appendChild(okBtn);
+    dialogOverlay.style.display = 'flex';
 }
 
-// Функция показа помощника
-function showAssistant(message) {
-    assistantText.textContent = message;
-    assistantOverlay.style.display = 'flex';
-}
 
-// Функция закрытия помощника
-function closeAssistant() {
-    assistantOverlay.style.display = 'none';
-}
 
 /* ========== ОБРАБОТКА СЕКРЕТНОГО ФАЙЛА ========== */
 function handleSecretFileClick() {
@@ -592,7 +622,23 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Функция открытия терминала (переход на страницу терминала)
 function openTerminal() {
     window.location.href = terminalUrl;
+}
+
+// Функция показа помощника
+function showAssistant(message) {
+    assistantText.textContent = message;
+    const buttonsContainer = document.querySelector('.assistant-buttons');
+    buttonsContainer.innerHTML = "";
+    const okBtn = document.createElement('button');
+    okBtn.textContent = "OK";
+    okBtn.addEventListener('click', closeAssistant);
+    buttonsContainer.appendChild(okBtn);
+    assistantOverlay.style.display = 'flex';
+}
+
+// Функция закрытия помощника
+function closeAssistant() {
+    assistantOverlay.style.display = 'none';
 }

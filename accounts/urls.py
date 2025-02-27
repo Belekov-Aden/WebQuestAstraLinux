@@ -16,6 +16,7 @@ urlpatterns = [
     path('stage_six/', views.stage_six, name='stage_six'),
     path('stage_seven/', views.stage_seven, name='stage_seven'),
     path('stage_seven_terminal/', views.stage_seven_terminal, name='stage_seven_terminal'),
+    path('stage_seven_conf/', views.stage_seven_conf, name='stage_seven_conf'),
     path("save_quiz_result_one/", views.save_quiz_result, name="save_quiz_result"),
     path('save_quiz_result_two/', views.save_quiz_result_two, name='save_quiz_result_two'),
     path('save_quiz_result_five/', views.save_quiz_result_five, name='save_quiz_result_five'),
