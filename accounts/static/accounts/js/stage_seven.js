@@ -16,10 +16,12 @@ const dialogButtons = document.getElementById('dialogButtons');
 const assistantOverlay = document.getElementById('assistantOverlay');
 const assistantText = document.getElementById('assistantText');
 
+console.log("Script initialization started");
+
 // Объект с инструкциями для наград
 const rewardInstructions = {
-    "Бейджик Инициации": "Поздравляю! Ты получил Бейджик Инициации за успешное прохождение первого этапа. Теперь начинается новое испытание – 'Операция Инициатива'. На этом виртуальном рабочем столе спрятан секретный файл 'Initiative.txt'. Твоя задача – найти и открыть его, чтобы получить дальнейшие указания. Используй знания, полученные на этапе знакомства с Astra Linux!",
-    "Токен Командной Строки": "На этапе 2 ты научился работать в терминале. Теперь попробуй выполнить команду 'ls' и изучи структуру файловой системы.",
+    "Бейджик Инициации": "Поздравляю! Ты получил Бейджик Инициации за успешное прохождение первого этапа. Теперь начинается интерактивное испытание 'Операция Инициатива'. На твоём виртуальном рабочем столе спрятан секретный файл 'Initiative.txt'. Твоя задача – найти и открыть его, чтобы получить дальнейшие указания. Используй всё, что узнал на этапе знакомства с Astra Linux!",
+    "Токен Командной Строки": "На этапе 2 ты научился работать в терминале. Теперь попробуй выполнить команду 'ls' и изучи структуру файловой системы. Для вызова терминала используй сочетание клавиш 'ALT+T'.",
     "Файл Знаний": "На этапе 3 ты собрал фрагменты документации. Твое задание: составь краткий конспект прочитанного материала.",
     "Щит Безопасности": "На этапе 4 ты узнал об инструментах защиты. Теперь попробуй настроить файрволл и просмотреть логи безопасности.",
     "Ключ Настройки": "На этапе 5 ты научился менять конфигурации системы. Твое задание: отредактируй конфигурационный файл и проверь результат.",
@@ -38,11 +40,19 @@ let librePresentCount = 0;
 let libreSheetCount = 0;
 let libreDocCount = 0;
 
-// Инициализация: назначение обработчиков для уже существующих иконок, панели наград и интерактивного элемента для этапа 1
+// Инициализация: назначение обработчиков для уже существующих иконок и панели наград
 document.addEventListener('DOMContentLoaded', () => {
     initIconsEvents();
-    initAwards();              // Инициализация наград
-    initStageOneInteractive(); // Добавляем интерактивный элемент для этапа 1
+    initAwards(); // Инициализация наград
+
+    // Проверяем, выполнено ли задание по токену (если да – подсвечиваем награду)
+    if (localStorage.getItem("terminalTokenCompleted") === "true") {
+         const tokenAward = document.querySelector('[data-award="Токен Командной Строки"]');
+         if (tokenAward) {
+             tokenAward.classList.add("correct");
+         }
+         localStorage.removeItem("terminalTokenCompleted");
+    }
 });
 
 /* ========== МЕНЮ РАБОЧЕГО СТОЛА ========== */
@@ -130,7 +140,6 @@ function hideAllMenus() {
 
 /* ========== ДЕЙСТВИЯ С ПРЕДМЕТОМ ========== */
 function onIconLeftClick(e) {
-    // Если другая иконка уже выбрана, убираем у неё выделение и класс expanded
     if (selectedIcon && selectedIcon !== this) {
         selectedIcon.classList.remove('selected');
         selectedIcon.classList.remove('expanded');
@@ -163,6 +172,12 @@ function initIconsEvents() {
     icons.forEach(icon => {
         icon.addEventListener('click', onIconLeftClick);
         icon.addEventListener('contextmenu', onIconRightClick);
+        // Для секретного файла: двойной клик
+        icon.addEventListener('dblclick', function(e) {
+            if (this.dataset.name === "Initiative.txt") {
+                handleSecretFileClick();
+            }
+        });
     });
 }
 
@@ -224,6 +239,8 @@ function createItem(type) {
     iconDiv.addEventListener('click', onIconLeftClick);
     iconDiv.addEventListener('contextmenu', onIconRightClick);
 
+    console.log("New item created:", label);
+
     hideAllMenus();
 }
 
@@ -264,7 +281,7 @@ function deleteItem() {
 function isFolder(iconEl) {
     const img = iconEl.querySelector('img');
     if (!img) return false;
-    return img.src.includes("376998") || img.src.includes("folder");
+    return img.src.includes("376/376998") || img.src.includes("folder");
 }
 
 /* ========== КАСТОМНЫЕ ДИАЛОГИ ========== */
@@ -322,11 +339,43 @@ function closeDialog() {
 
 /* ========== ИНИЦИАЛИЗАЦИЯ ПАНЕЛИ НАГРАД ========== */
 function initAwards() {
-    const awards = document.querySelectorAll('.awards-panel .award');
+    console.log("Initializing awards...");
+    const awards = document.querySelectorAll('.award');
+    if (awards.length === 0) {
+        console.error("No awards found!");
+        return;
+    }
+
     awards.forEach(award => {
-        award.addEventListener('click', function() {
-            const awardName = this.getAttribute('data-award');
+        award.style.pointerEvents = 'auto';
+        award.addEventListener('click', function(e) {
+            e.stopPropagation();
+            console.log("Award clicked:", this.dataset.award);
+            const awardName = this.dataset.award;
             const instruction = rewardInstructions[awardName] || "Инструкции для этой награды пока не заданы.";
+
+            // Если выбрана награда первой этапа, показываем секретный файл
+            if (awardName === "Бейджик Инициации") {
+                const secretFile = document.querySelector('.secret-file');
+                if (secretFile) {
+                    const desktopRect = desktop.getBoundingClientRect();
+                    const maxX = desktopRect.width - 100;
+                    const maxY = desktopRect.height - 100;
+                    const randomX = Math.floor(Math.random() * maxX);
+                    const randomY = Math.floor(Math.random() * maxY);
+                    secretFile.style.display = 'block';
+                    secretFile.style.left = `${randomX}px`;
+                    secretFile.style.top = `${randomY}px`;
+                    secretFile.style.opacity = '0.2';
+                    secretFile.removeEventListener('dblclick', handleSecretFileClick);
+                    secretFile.addEventListener('dblclick', handleSecretFileClick);
+                    console.log('Secret file position:', randomX, randomY);
+                }
+            }
+            // Если выбрана награда второй этапа, активируем условие для терминала
+            else if (awardName === "Токен Командной Строки") {
+                localStorage.setItem("terminalTokenActive", "true");
+            }
             showAssistant(instruction);
         });
     });
@@ -335,10 +384,45 @@ function initAwards() {
 // Функция показа помощника
 function showAssistant(message) {
     assistantText.textContent = message;
-    assistantOverlay.style.display = 'flex'; // Показываем оверлей помощника
+    assistantOverlay.style.display = 'flex';
 }
 
 // Функция закрытия помощника
 function closeAssistant() {
     assistantOverlay.style.display = 'none';
+}
+
+/* ========== ОБРАБОТКА СЕКРЕТНОГО ФАЙЛА ========== */
+function handleSecretFileClick() {
+    showDialog({
+        title: "Секретный файл",
+        message: "Введите год создания Astra Linux:",
+        type: 'prompt',
+        defaultValue: '',
+        onConfirm: (inputYear) => {
+            const award = document.querySelector('[data-award="Бейджик Инициации"]');
+            if (inputYear === '2008') {
+                award.classList.add('correct');
+                award.classList.remove('incorrect');
+                showAssistant("Правильно! Astra Linux создана в 2008 году!");
+            } else {
+                award.classList.add('incorrect');
+                award.classList.remove('correct');
+                showAssistant("Неверно! Попробуйте ещё раз!");
+            }
+        }
+    });
+}
+
+// Обработчик клавиш для вызова терминала (Alt+T)
+document.addEventListener('keydown', function(e) {
+    if (e.altKey && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        openTerminal();
+    }
+});
+
+// Функция открытия терминала (переход на страницу терминала)
+function openTerminal() {
+    window.location.href = terminalUrl;
 }

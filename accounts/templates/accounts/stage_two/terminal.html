@@ -174,7 +174,7 @@
     <div id="terminal" class="terminal">
         <div id="terminal-output"></div>
         <div class="input-line">
-            <span id="prompt" class="prompt">C:/ $</span>
+            <span id="prompt" class="prompt">admpc@astra-2-12:~$</span>
             <input type="text" id="terminal-input" class="terminal-input" autofocus>
         </div>
     </div>
@@ -228,14 +228,14 @@
 
     // Файловая система
     const fileSystem = {
-        "C:/": ["home", "var", "settings"],
-        "C:/home": ["students"],
-        "C:/home/students": [],
-        "C:/settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
-        "C:/var": []
+        "admpc@astra-2-12:~$": ["home", "var", "settings"],
+        "admpc@astra-2-12:~$home": ["students"],
+        "admpc@astra-2-12:~$home/students": [],
+        "admpc@astra-2-12:~$settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
+        "admpc@astra-2-12:~$var": []
     };
 
-    let currentDir = "C:/";
+    let currentDir = "admpc@astra-2-12:~$";
 
     function updatePrompt() {
         document.getElementById("prompt").textContent = currentDir + " $";
@@ -246,7 +246,7 @@
     // Задания
     const tasks = [
         {
-            description: "Задание 1: Перейдите в каталог C:/home/students (команда: cd home/students)",
+            description: "Задание 1: Перейдите в каталог admpc@astra-2-12:~$home/students (команда: cd home/students)",
             commands: ["cd home/students"]
         },
         {description: "Задание 2: Вернитесь в корневой каталог (команда: cd /)", commands: ["cd /"]},
@@ -259,7 +259,7 @@
     ];
 
     const finalTask = {
-        description: "Финальное задание: Перейдите в каталог C:/home/students, создайте папки main и work, проверьте их наличие и вернитесь в корневой каталог.",
+        description: "Финальное задание: Перейдите в каталог admpc@astra-2-12:~$home/students, создайте папки main и work, проверьте их наличие и вернитесь в корневой каталог.",
         commands: ["cd home/students", "mkdir main", "mkdir work", "ls", "cd /"]
     };
 
@@ -330,11 +330,11 @@
         } else if (cmd.toLowerCase().startsWith("cd ")) {
             let newDir = cmd.slice(3).trim();
             if (newDir === "/") {
-                currentDir = "C:/";
+                currentDir = "admpc@astra-2-12:~$";
                 updatePrompt();
                 return "";
             }
-            if (!newDir.startsWith("C:/")) {
+            if (!newDir.startsWith("admpc@astra-2-12:~$")) {
                 if (currentDir.endsWith("/")) {
                     newDir = currentDir + newDir;
                 } else {
@@ -344,8 +344,8 @@
             if (fileSystem[newDir] !== undefined) {
                 currentDir = newDir;
                 updatePrompt();
-                // Пасхалка: если зашли в C:/settings, выводим содержимое
-                if (newDir === "C:/settings") {
+                // Пасхалка: если зашли в admpc@astra-2-12:~$settings, выводим содержимое
+                if (newDir === "admpc@astra-2-12:~$settings") {
                     return fileSystem[newDir].join("  ");
                 }
                 return "";
@@ -385,8 +385,8 @@
         if (!finalMode) {
             // Проверка базовых заданий
             const expected = tasks[currentTaskIndex].commands[currentCommandIndex];
-            // Доп. проверка для задания 4 (mkdir job) - пользователь должен быть в C:/var
-            if (currentTaskIndex === 3 && currentCommandIndex === 1 && currentDir !== "C:/var") {
+            // Доп. проверка для задания 4 (mkdir job) - пользователь должен быть в admpc@astra-2-12:~$var
+            if (currentTaskIndex === 3 && currentCommandIndex === 1 && currentDir !== "admpc@astra-2-12:~$var") {
                 appendOutput("Вы не находитесь в каталоге var. Сначала перейдите в каталог var.", "congrats");
                 return;
             }
@@ -414,7 +414,7 @@
                                 currentFinalCommandIndex = 0;
                                 finalAttempts = 2;
                                 // Автоматически перемещаемся в корень
-                                currentDir = "C:/";
+                                currentDir = "admpc@astra-2-12:~$";
                                 updatePrompt();
                                 renderFinalTask();
                             }, 1500);

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{% static 'accounts/css/stage_seven.css' %}">
 </head>
 <body>
-<!-- Верхняя панель (можно оставить, если нужно) -->
+<!-- Верхняя панель -->
 <div class="top-panel">
     <div class="panel-left">
         Astra Linux – Рабочий стол
@@ -22,7 +22,12 @@
 
 <!-- Рабочий стол -->
 <div class="desktop" id="desktop">
-    <!-- Пример новых иконок (аналогично тому, что в Astra Linux) -->
+    <!-- Скрытый файл для задания -->
+    <div class="icon hidden-file secret-file" data-name="Initiative.txt" style="display: none; opacity: 0.2;">
+        <img src="{% static 'accounts/img/Очки.png' %}" alt="Secret File">
+        <span>Initiative.txt</span>
+    </div>
+    <!-- Пример иконок рабочего стола -->
     <div class="icon" data-name="Web-браузер Firefox">
         <img src="{% static 'accounts/img/firefox.png' %}" alt="Firefox">
         <span>Firefox</span>
@@ -92,7 +97,7 @@
     </ul>
 </div>
 
-<!-- Панель наград (пример из предыдущего кода) -->
+<!-- Панель наград -->
 <div class="awards-panel" id="awardsPanel">
     <div class="award" data-award="Бейджик Инициации">
         <img src="{% static 'accounts/img/Звезда.png' %}" alt="Бейджик Инициации">
@@ -133,15 +138,25 @@
     </div>
 </div>
 
+<!-- Модальное окно терминала -->
+<div id="terminal-modal" class="modal-overlay" style="display: none;">
+    <div class="terminal-container">
+        <div id="terminal" class="terminal">
+            <div id="terminal-output"></div>
+            <div class="input-line">
+                <span id="prompt" class="prompt">admpc@astra-2-12:~$</span>
+                <input type="text" id="terminal-input" class="terminal-input" autofocus>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Новая нижняя панель -->
 <div class="bottom-panel">
     <div class="bottom-panel-left">
-        <!-- "Кнопка меню" или "логотип Astra" -->
         <div class="panel-button">
             <img src="https://cdn-icons-png.flaticon.com/512/566/566004.png" alt="Astra Menu">
         </div>
-        <!-- Можно добавить закреплённые приложения -->
         <div class="panel-button">
             <img src="https://cdn-icons-png.flaticon.com/512/5968/5968282.png" alt="Firefox">
         </div>
@@ -150,7 +165,6 @@
         </div>
     </div>
     <div class="bottom-panel-right">
-        <!-- Пример иконок системного трея -->
         <div class="panel-tray">
             <img src="https://cdn-icons-png.flaticon.com/512/1828/1828598.png" alt="Volume">
             <img src="https://cdn-icons-png.flaticon.com/512/130/130188.png" alt="Network">
@@ -173,13 +187,14 @@
     <div class="dialog-window">
         <h2 id="dialogTitle">Подтверждение</h2>
         <p id="dialogMessage"></p>
-        <input type="text" id="dialogInput"
-               style="display: none; width: 100%; box-sizing: border-box; padding: 5px; margin-bottom: 10px;">
+        <input type="text" id="dialogInput" style="display: none; width: 100%; box-sizing: border-box; padding: 5px; margin-bottom: 10px;">
         <div class="dialog-buttons" id="dialogButtons"></div>
     </div>
 </div>
 
-<!-- Подключаем скрипт -->
+<script>
+    var terminalUrl = "{% url 'stage_seven_terminal' %}";
+</script>
 <script src="{% static 'accounts/js/stage_seven.js' %}"></script>
 </body>
 </html>
