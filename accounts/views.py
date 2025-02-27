@@ -205,3 +205,11 @@ def stage_five_main(request):
 
 def stage_six(request):
     return render(request, 'accounts/stage_six/index.html')
+
+
+def stage_seven(request):
+    return render(request, 'accounts/stage_seven/main.html')
+
+
+def stage_seven_terminal(request):
+    return render(request, 'accounts/stage_seven/stage_seven_terminal.html')
