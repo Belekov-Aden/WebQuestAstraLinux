@@ -164,8 +164,7 @@
     <div class="modal">
         <p>Поздравляем!!! Ты прошел второй этап, твоя награда - «Токен Командной Строки», подтверждает освоение базового
             функционала терминала</p>
-                <img src="{% static 'accounts/img/Трофей 2.png' %}" alt="" style="width: 25%">
-
+        <img src="{% static 'accounts/img/Трофей 2_not.png' %}" alt="" style="width: 25%">
         <div class="pill-buttons">
             <button id="win-exit" class="pill-button green-pill">Вперед</button>
         </div>
@@ -176,7 +175,7 @@
     <div id="terminal" class="terminal">
         <div id="terminal-output"></div>
         <div class="input-line">
-            <span id="prompt" class="prompt">C:/</span>
+            <span id="prompt" class="prompt">user@astra:~$</span>
             <input type="text" id="terminal-input" class="terminal-input" autofocus>
         </div>
     </div>
@@ -227,20 +226,19 @@
         window.location.href = "{% url 'map' %}";
     });
 
-
     // Файловая система
     const fileSystem = {
-        "C:/": ["home", "var", "settings"],
-        "C:/home": ["students"],
-        "C:/home/students": [],
-        "C:/settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
-        "C:/var": []
+        "user@astra:~$": ["home", "var", "settings"],
+        "user@astra:~$home": ["students"],
+        "user@astra:~$home/students": [],
+        "user@astra:~$settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
+        "user@astra:~$var": []
     };
 
-    let currentDir = "C:/";
+    let currentDir = "user@astra:~$";
 
     function updatePrompt() {
-        document.getElementById("prompt").textContent = currentDir + "$";
+        document.getElementById("prompt").textContent = currentDir;
     }
 
     updatePrompt();
@@ -248,7 +246,7 @@
     // Задания
     const tasks = [
         {
-            description: "Задание 1: Перейдите в каталог C:/home/students (команда: cd home/students)",
+            description: "Задание 1: Перейдите в каталог user@astra:~$home/students (команда: cd home/students)",
             commands: ["cd home/students"]
         },
         {description: "Задание 2: Вернитесь в корневой каталог (команда: cd /)", commands: ["cd /"]},
@@ -261,7 +259,7 @@
     ];
 
     const finalTask = {
-        description: "Финальное задание: Перейдите в каталог C:/home/students, создайте папки main и work, проверьте их наличие и вернитесь в корневой каталог.",
+        description: "Финальное задание: Перейдите в каталог user@astra:~$home/students, создайте папки main и work, проверьте их наличие и вернитесь в корневой каталог.",
         commands: ["cd home/students", "mkdir main", "mkdir work", "ls", "cd /"]
     };
 
@@ -332,12 +330,12 @@
         } else if (cmd.toLowerCase().startsWith("cd ")) {
             let newDir = cmd.slice(3).trim();
             if (newDir === "/") {
-                currentDir = "C:/";
+                currentDir = "user@astra:~$";
                 updatePrompt();
                 return "";
             }
-            if (!newDir.startsWith("C:/")) {
-                if (currentDir.endsWith("/")) {
+            if (!newDir.startsWith("user@astra:~$")) {
+                if (currentDir.endsWith("$")) {
                     newDir = currentDir + newDir;
                 } else {
                     newDir = currentDir + "/" + newDir;
@@ -346,8 +344,8 @@
             if (fileSystem[newDir] !== undefined) {
                 currentDir = newDir;
                 updatePrompt();
-                // Пасхалка: если зашли в C:/settings, выводим содержимое
-                if (newDir === "C:/settings") {
+                // Пасхалка: если зашли в user@astra:~$settings, выводим содержимое
+                if (newDir === "user@astra:~$settings") {
                     return fileSystem[newDir].join("  ");
                 }
                 return "";
@@ -357,7 +355,7 @@
         } else if (cmd.toLowerCase().startsWith("mkdir ")) {
             let folderName = cmd.slice(6).trim();
             let newDir;
-            if (currentDir.endsWith("/")) {
+            if (currentDir.endsWith("$")) {
                 newDir = currentDir + folderName;
             } else {
                 newDir = currentDir + "/" + folderName;
@@ -387,8 +385,8 @@
         if (!finalMode) {
             // Проверка базовых заданий
             const expected = tasks[currentTaskIndex].commands[currentCommandIndex];
-            // Доп. проверка для задания 4 (mkdir job) - пользователь должен быть в C:/var
-            if (currentTaskIndex === 3 && currentCommandIndex === 1 && currentDir !== "C:/var") {
+            // Доп. проверка для задания 4 (mkdir job) - пользователь должен быть в user@astra:~$var
+            if (currentTaskIndex === 3 && currentCommandIndex === 1 && currentDir !== "user@astra:~$var") {
                 appendOutput("Вы не находитесь в каталоге var. Сначала перейдите в каталог var.", "congrats");
                 return;
             }
@@ -416,7 +414,7 @@
                                 currentFinalCommandIndex = 0;
                                 finalAttempts = 2;
                                 // Автоматически перемещаемся в корень
-                                currentDir = "C:/";
+                                currentDir = "user@astra:~$";
                                 updatePrompt();
                                 renderFinalTask();
                             }, 1500);
@@ -437,7 +435,6 @@
                 if (currentFinalCommandIndex >= finalTask.commands.length) {
                     // ВСЕ финальные команды выполнены
                     appendOutput("Поздравляем! Вы успешно выполнили финальное задание!");
-                    // Вместо простого вывода - показываем окно победы
                     sendCompletionStatus();
                     showWinModal();
                 } else {
@@ -451,7 +448,7 @@
                 } else {
                     appendOutput("Вы не справились с финальным заданием. Игра окончена.");
                     finalAttempts = 0;
-                    showLoseModal(); // Показываем окно проигрыша
+                    showLoseModal();
                 }
             }
         }

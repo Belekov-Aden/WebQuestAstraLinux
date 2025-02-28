@@ -136,7 +136,7 @@
     <div id="terminal" class="terminal">
         <div id="terminal-output"></div>
         <div class="input-line">
-            <span id="prompt" class="prompt">admpc@astra-2-12:~$</span>
+            <span id="prompt" class="prompt">user@astra:~$</span>
             <input type="text" id="terminal-input" class="terminal-input" autofocus>
         </div>
     </div>
@@ -183,15 +183,15 @@
 
     // Файловая система
     const fileSystem = {
-        "admpc@astra-2-12:~$": ["home", "var", "settings"],
-        "admpc@astra-2-12:~$home": ["students"],
-        "admpc@astra-2-12:~$home/students": ["student1.txt", "student2.txt", "student3.txt"],
-        "admpc@astra-2-12:~$settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
-        "admpc@astra-2-12:~$var": []
+        "user@astra:~$": ["home", "var", "settings"],
+        "user@astra:~$home": ["students"],
+        "user@astra:~$home/students": ["student1.txt", "student2.txt", "student3.txt"],
+        "user@astra:~$settings": ["Команда разработчиков: Герасимов Никита", "Белеков Аден."],
+        "user@astra:~$var": []
     };
 
     // Текущее расположение
-    let currentDir = "admpc@astra-2-12:~$";
+    let currentDir = "user@astra:~$";
     function updatePrompt() {
         document.getElementById("prompt").textContent = currentDir;
     }
@@ -243,7 +243,7 @@
             localStorage.removeItem("terminalTokenActive");
             localStorage.setItem("terminalTokenCompleted", "true");
             // Выводим содержимое каталога
-            let content = fileSystem["admpc@astra-2-12:~$home/students"].join("  ");
+            let content = fileSystem["user@astra:~$home/students"].join("  ");
             appendOutput("Содержимое каталога /home/students: " + content, "congrats");
 
             // Показываем окно победы
@@ -257,7 +257,7 @@
             localStorage.removeItem("terminalTokenActive");
             localStorage.setItem("terminalTokenCompleted", "true");
             // Выводим содержимое каталога
-            let content = fileSystem["admpc@astra-2-12:~$home/students"].join("  ");
+            let content = fileSystem["user@astra:~$home/students"].join("  ");
             appendOutput("Содержимое каталога /home/students: " + content, "congrats");
             saveProgressToServer("Токен Командной Строки", true);
             // Показываем окно победы
@@ -278,11 +278,11 @@
         } else if (cmd.startsWith("cd ")) {
             let newDir = cmd.slice(3).trim();
             if (newDir === "/") {
-                currentDir = "admpc@astra-2-12:~$";
+                currentDir = "user@astra:~$";
                 updatePrompt();
                 return "";
             }
-            if (!newDir.startsWith("admpc@astra-2-12:~$")) {
+            if (!newDir.startsWith("user@astra:~$")) {
                 if (currentDir.endsWith("/")) {
                     newDir = currentDir + newDir;
                 } else {

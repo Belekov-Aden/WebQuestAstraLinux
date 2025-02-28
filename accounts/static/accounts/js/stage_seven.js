@@ -203,6 +203,66 @@ function hideAllMenus() {
     itemMenu.style.display = 'none';
 }
 
+// Проверка пересечения двух элементов (по их bounding boxes)
+function doElementsOverlap(rect1, rect2) {
+    return !(
+        rect1.right < rect2.left ||
+        rect1.left > rect2.right ||
+        rect1.bottom < rect2.top ||
+        rect1.top > rect2.bottom
+    );
+}
+
+// Функция для поиска свободного места для скрытого файла
+function findFreePositionForSecretFile(desktopRect, iconWidth, iconHeight) {
+    const maxAttempts = 50; // Максимальное количество попыток поиска позиции
+    const icons = document.querySelectorAll('.icon:not(.secret-file)'); // Все иконки, кроме самого скрытого файла
+
+    // Размеры рабочего стола
+    const maxX = desktopRect.width - iconWidth;
+    const maxY = desktopRect.height - iconHeight;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        // Генерируем случайные координаты
+        const randomX = Math.floor(Math.random() * maxX);
+        const randomY = Math.floor(Math.random() * maxY);
+
+        // Создаем временный bounding box для новой позиции
+        const newRect = {
+            left: randomX,
+            right: randomX + iconWidth,
+            top: randomY,
+            bottom: randomY + iconHeight
+        };
+
+        // Проверяем, пересекается ли новая позиция с существующими иконками
+        let overlaps = false;
+        for (let icon of icons) {
+            if (icon.style.display === 'none') continue; // Пропускаем невидимые иконки
+            const iconRect = icon.getBoundingClientRect();
+            const relativeIconRect = {
+                left: iconRect.left - desktopRect.left,
+                right: iconRect.right - desktopRect.left,
+                top: iconRect.top - desktopRect.top,
+                bottom: iconRect.bottom - desktopRect.top
+            };
+            if (doElementsOverlap(newRect, relativeIconRect)) {
+                overlaps = true;
+                break;
+            }
+        }
+
+        // Если не пересекается, возвращаем координаты
+        if (!overlaps) {
+            return { x: randomX, y: randomY };
+        }
+    }
+
+    // Если не удалось найти свободное место, возвращаем случайные координаты (fallback)
+    console.warn("Не удалось найти свободное место после", maxAttempts, "попыток. Используем случайную позицию.");
+    return { x: Math.floor(Math.random() * maxX), y: Math.floor(Math.random() * maxY) };
+}
+
 /* ========== ДЕЙСТВИЯ С ПРЕДМЕТОМ ========== */
 function onIconLeftClick(e) {
     if (selectedIcon && selectedIcon !== this) {
@@ -438,17 +498,21 @@ function initAwards() {
                 const secretFile = document.querySelector('.secret-file');
                 if (secretFile) {
                     const desktopRect = desktop.getBoundingClientRect();
-                    const maxX = desktopRect.width - 100;
-                    const maxY = desktopRect.height - 100;
-                    const randomX = Math.floor(Math.random() * maxX);
-                    const randomY = Math.floor(Math.random() * maxY);
+                    const secretFileRect = secretFile.getBoundingClientRect();
+                    const iconWidth = secretFileRect.width; // Предполагаемая ширина иконки
+                    const iconHeight = secretFileRect.height; // Предполагаемая высота иконки
+
+                    // Находим свободное место
+                    const position = findFreePositionForSecretFile(desktopRect, iconWidth, iconHeight);
+
+                    // Показываем скрытый файл в свободном месте
                     secretFile.style.display = 'block';
-                    secretFile.style.left = `${randomX}px`;
-                    secretFile.style.top = `${randomY}px`;
+                    secretFile.style.left = `${position.x}px`;
+                    secretFile.style.top = `${position.y}px`;
                     secretFile.style.opacity = '0.2';
                     secretFile.removeEventListener('dblclick', handleSecretFileClick);
                     secretFile.addEventListener('dblclick', handleSecretFileClick);
-                    console.log('Secret file position:', randomX, randomY);
+                    console.log('Secret file position:', position.x, position.y);
                 }
             }
             else if (awardName === "Токен Командной Строки") {
