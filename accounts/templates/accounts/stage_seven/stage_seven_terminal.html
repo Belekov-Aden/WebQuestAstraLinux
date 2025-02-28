@@ -147,6 +147,28 @@
 </div>
 
 <script>
+    function saveProgressToServer(taskName, completed) {
+        fetch('/save-progress/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(), // Используем CSRF-токен для Django
+            },
+            body: JSON.stringify({
+                task_name: taskName,
+                completed: completed
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Progress saved:', taskName, completed);
+            } else {
+                console.error('Error saving progress:', data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
     // Кнопки
     document.getElementById('blue-pill').addEventListener('click', function () {
         window.location.href = "{% url 'stage_seven' %}";
@@ -171,7 +193,7 @@
     // Текущее расположение
     let currentDir = "admpc@astra-2-12:~$";
     function updatePrompt() {
-        document.getElementById("prompt").textContent = currentDir + " $";
+        document.getElementById("prompt").textContent = currentDir;
     }
     updatePrompt();
 
@@ -223,9 +245,25 @@
             // Выводим содержимое каталога
             let content = fileSystem["admpc@astra-2-12:~$home/students"].join("  ");
             appendOutput("Содержимое каталога /home/students: " + content, "congrats");
+
+            // Показываем окно победы
+            showWinModal();
+
+            saveProgressToServer("Токен Командной Строки", true);
+            return "";
+        }
+        if (localStorage.getItem("terminalTokenActive") === "true" && cmd.toLowerCase() === "ls /home/students") {
+            // Сбрасываем флаг активности и устанавливаем флаг завершения
+            localStorage.removeItem("terminalTokenActive");
+            localStorage.setItem("terminalTokenCompleted", "true");
+            // Выводим содержимое каталога
+            let content = fileSystem["admpc@astra-2-12:~$home/students"].join("  ");
+            appendOutput("Содержимое каталога /home/students: " + content, "congrats");
+            saveProgressToServer("Токен Командной Строки", true);
             // Показываем окно победы
             showWinModal();
             return "";
+            saveProgressToServer("Токен Командной Строки", true);
         }
 
         // Остальные команды

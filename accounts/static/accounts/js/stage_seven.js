@@ -53,22 +53,79 @@ document.addEventListener('DOMContentLoaded', () => {
     // Проверяем, выполнено ли задание по токену (если да – подсвечиваем награду)
     if (localStorage.getItem("terminalTokenCompleted") === "true") {
          const tokenAward = document.querySelector('[data-award="Токен Командной Строки"]');
-         if (tokenAward) {
-             tokenAward.classList.add("correct");
-         }
+         saveProgressToServer("Токен Командной Строки", true);
          localStorage.removeItem("terminalTokenCompleted");
     }
 
-    if (localStorage.getItem("confCompleted") === "true") {
-        const configAward = document.querySelector('[data-award="Ключ Настройки"]');
-        if (configAward) {
-            configAward.classList.add("correct");
-            configAward.classList.remove("incorrect");
-        }
-        localStorage.removeItem("confCompleted");
-    }
-
 });
+// Функция для отправки прогресса на сервер
+function saveProgressToServer(taskName, completed) {
+    fetch('/save-progress/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(), // Используем CSRF-токен для Django
+        },
+        body: JSON.stringify({
+            task_name: taskName,
+            completed: completed
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Progress saved:', taskName, completed);
+        } else {
+            console.error('Error saving progress:', data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Функция для получения CSRF-токена из cookies (нужна для Django)
+function getCsrfToken() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Функция для загрузки прогресса из БД
+function loadProgressFromServer() {
+    fetch('/get-progress/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const progress = data.progress;
+            // Подсвечиваем выполненные задания
+            Object.keys(progress).forEach(taskName => {
+                const award = document.querySelector(`[data-award="${taskName}"]`);
+                if (award && progress[taskName]) {
+                    award.classList.add('correct');
+                    award.classList.remove('incorrect');
+                }
+            });
+        } else {
+            console.error('Error loading progress:', data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
 
 /* ========== МЕНЮ РАБОЧЕГО СТОЛА ========== */
 desktop.addEventListener('contextmenu', function (e) {
@@ -366,6 +423,10 @@ function initAwards() {
         console.error("No awards found!");
         return;
     }
+
+    // Загружаем прогресс из БД при загрузке страницы
+    loadProgressFromServer();
+
     awards.forEach(award => {
         award.style.pointerEvents = 'auto';
         award.addEventListener('click', function(e) {
@@ -373,7 +434,6 @@ function initAwards() {
             console.log("Award clicked:", this.dataset.award);
             const awardName = this.dataset.award;
             const instruction = rewardInstructions[awardName] || "Инструкции для этой награды пока не заданы.";
-            // Если награда первой этапа – секретный файл
             if (awardName === "Бейджик Инициации") {
                 const secretFile = document.querySelector('.secret-file');
                 if (secretFile) {
@@ -391,28 +451,22 @@ function initAwards() {
                     console.log('Secret file position:', randomX, randomY);
                 }
             }
-            // Если награда второй этапа
             else if (awardName === "Токен Командной Строки") {
                 localStorage.setItem("terminalTokenActive", "true");
             }
-            // Если награда третьей этапа
             else if (awardName === "Файл Знаний") {
                 fileKnowledgeRewardActive = true;
                 fileCreationDone = false;
                 fileRenamingDone = false;
                 fileDeletionDone = false;
             }
-            // Если награда четвертой этапа – щит безопасности (антивирус)
             else if (awardName === "Щит Безопасности") {
                 createAntivirusIcon();
             }
-            // Если выбрана награда "Ключ Настройки" (пятая награда)
             else if (awardName === "Ключ Настройки") {
-                // Используем переменную confUrl, определённую в шаблоне
                 showAssistantWithRedirect(instruction, "Перейти", confUrl);
                 return;
             }
-            // Если выбрана награда "Оптимизирующий Бейдж" (шестая награда)
             else if (awardName === "Оптимизирующий Бейдж") {
                 handleOptimizationAssignment();
                 return;
@@ -429,6 +483,8 @@ function checkFileKnowledgeRewardComplete() {
         if (fileKnowledgeAward) {
             fileKnowledgeAward.classList.add('correct');
             fileKnowledgeAward.classList.remove('incorrect');
+            // Сохраняем прогресс в БД
+            saveProgressToServer("Файл Знаний", true);
         }
         showAssistant("Поздравляем! Ты выполнил все действия: создание, переименование и удаление файла.");
         fileKnowledgeRewardActive = false;
@@ -443,11 +499,12 @@ function showAssistantWithRedirect(message, buttonText, redirectUrl) {
     const btn = document.createElement('button');
     btn.textContent = buttonText;
     btn.addEventListener('click', function() {
-         // Подсвечиваем награду "Ключ Настройки" зелёным
          const configAward = document.querySelector('[data-award="Ключ Настройки"]');
          if (configAward) {
               configAward.classList.add("correct");
               configAward.classList.remove("incorrect");
+              // Сохраняем прогресс в БД
+              saveProgressToServer("Ключ Настройки", true);
          }
          window.location.href = redirectUrl;
     });
@@ -533,11 +590,13 @@ function showAntivirusPasswordDialog() {
             if (shieldAward) {
                 shieldAward.classList.add('correct');
                 shieldAward.classList.remove('incorrect');
+                // Сохраняем прогресс в БД
+                saveProgressToServer("Щит Безопасности", true);
             }
             closeDialog();
             showAssistant("Обновление антивируса успешно завершено!");
         } else {
-            dialogMessage.textContent = "Пароль ненадежный. Попробуйте ещё раз (минимум 8 символов, с буквами, цифрами и знаком):";
+            dialogMessage.textContent = "Пароль ненадежный. Попробуйте ещё раз (минимум 8 символов, буквы, цифры и знак):";
             dialogInput.value = "";
         }
     });
@@ -555,34 +614,30 @@ function validatePassword(pwd) {
 }
 
 function handleOptimizationAssignment() {
-    // Открываем диалог с инструкцией к заданию
     dialogTitle.textContent = "Оптимизация системы";
     dialogMessage.textContent = "В системе запущены следующие службы: bluetooth, NetworkManager, cups, cron.\nОтключите те, которые не требуются для оптимальной работы (подсказка: bluetooth и cups обычно не нужны на сервере).\nВведите названия служб через пробел:";
     dialogInput.style.display = 'block';
     dialogInput.value = "";
     dialogButtons.innerHTML = "";
 
-    // Создаем кнопку OK; окно не закрывается, если ответ неверный
     const okBtn = document.createElement('button');
     okBtn.textContent = 'OK';
     okBtn.className = 'ok-btn';
     okBtn.addEventListener('click', () => {
         const input = dialogInput.value.trim();
-        // Разбиваем ввод по пробелам и приводим к нижнему регистру
         const tokens = input.split(/\s+/).map(s => s.toLowerCase()).sort();
-        // Ожидаемый ответ: отключить "bluetooth" и "cups"
         const correctTokens = ["bluetooth", "cups"].sort();
         if (JSON.stringify(tokens) === JSON.stringify(correctTokens)) {
-            // Если ответ верный, подсвечиваем награду зелёным
             const optimizeAward = document.querySelector('[data-award="Оптимизирующий Бейдж"]');
             if (optimizeAward) {
                 optimizeAward.classList.add('correct');
                 optimizeAward.classList.remove('incorrect');
+                // Сохраняем прогресс в БД
+                saveProgressToServer("Оптимизирующий Бейдж", true);
             }
             closeDialog();
             showAssistant("Поздравляем! Отключение службы bluetooth уменьшает энергопотребление, а отключение CUPS избавляет от ненужного обслуживания печати – это повышает производительность и безопасность системы.");
         } else {
-            // Если ответ неверный, обновляем сообщение и очищаем поле ввода для повторного ввода
             dialogMessage.textContent = "Неверный ответ. Проверьте список служб и попробуйте ещё раз.\nПодсказка: отключите службы bluetooth и cups.";
             dialogInput.value = "";
         }
@@ -606,10 +661,13 @@ function handleSecretFileClick() {
                 award.classList.add('correct');
                 award.classList.remove('incorrect');
                 showAssistant("Правильно! Astra Linux создана в 2008 году!");
+                // Сохраняем прогресс в БД
+                saveProgressToServer("Бейджик Инициации", true);
             } else {
                 award.classList.add('incorrect');
                 award.classList.remove('correct');
                 showAssistant("Неверно! Попробуйте ещё раз!");
+                saveProgressToServer("Бейджик Инициации", false);
             }
         }
     });

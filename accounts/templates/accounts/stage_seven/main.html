@@ -197,6 +197,7 @@
 <script>
     var terminalUrl = "{% url 'stage_seven_terminal' %}";
     var confUrl = "{% url 'stage_seven_conf' %}";
+    var csrfToken = "{{ csrf_token }}";
 </script>
 <script src="{% static 'accounts/js/stage_seven.js' %}"></script>
 
