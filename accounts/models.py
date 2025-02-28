@@ -20,3 +20,17 @@ class QuizResult(models.Model):
 
     class Meta:
         verbose_name = 'Результаты по квестам'
+
+class StageSevenProgress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    badge_initiation = models.BooleanField(default=False)
+    token_command_line = models.BooleanField(default=False)
+    file_knowledge = models.BooleanField(default=False)
+    security_shield = models.BooleanField(default=False)
+    settings_key = models.BooleanField(default=False)
+    optimization_badge = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Прогресс этапа 7'
+        verbose_name_plural = 'Прогресс этапов 7'

@@ -1,0 +1,380 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Интерактивный терминал Astra‑Linux – Конфигурация</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* Приветственное окно */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: #111;
+            border: 1px solid #0f0;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            color: #0f0;
+            font-size: 18px;
+        }
+        .modal p {
+            margin-bottom: 20px;
+        }
+        .pill-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .pill-button {
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .blue-pill {
+            background: #1a2f60;
+        }
+        .red-pill {
+            background: red;
+        }
+        .green-pill {
+            background: #00f000;
+        }
+        /* Терминал */
+        .terminal-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .terminal {
+            border: 1px solid #0f0;
+            padding: 20px;
+            background: #000;
+            min-height: 400px;
+            position: relative;
+        }
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+        .prompt {
+            margin-right: 5px;
+        }
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-size: 16px;
+            flex: 1;
+        }
+        .terminal-input:focus {
+            outline: none;
+        }
+        .output {
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+        /* Блок заданий */
+        .tasks {
+            width: 300px;
+            border-left: 1px solid #0f0;
+            padding: 20px;
+            overflow-y: auto;
+            color: #0f0;
+            font-size: 14px;
+        }
+        .tasks h2 {
+            margin-top: 0;
+        }
+        .task {
+            margin-bottom: 20px;
+        }
+        .task.active {
+            font-weight: bold;
+            color: #ff0;
+        }
+        .task.completed {
+            background: rgba(0, 128, 0, 0.5);
+            padding: 5px;
+            border-radius: 4px;
+        }
+        /* Модальное окно завершения задания */
+        #taskCompleteOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+        #taskCompleteOverlay .modal {
+            background: #111;
+            border: 1px solid #0f0;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            color: #0f0;
+            font-size: 18px;
+        }
+        #taskNextButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #1a2f60;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Приветственное окно -->
+<div id="modal-overlay" class="modal-overlay">
+    <div class="modal">
+        <div class="pill-buttons">
+            <button id="blue-pill" class="pill-button blue-pill">Вернуться на рабочий стол</button>
+            <button id="red-pill" class="pill-button red-pill">Начать миссию</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно проигрыша -->
+<div id="lose-overlay" class="modal-overlay" style="display:none;">
+    <div class="modal">
+        <p>У вас закончились попытки. Вы проиграли!</p>
+    </div>
+</div>
+
+<!-- Модальное окно победы -->
+<div id="win-overlay" class="modal-overlay" style="display:none;">
+    <div class="modal">
+        <p>Поздравляем!!! Ты прошел миссию и получил «Ключ Настройки»!</p>
+        <div class="pill-buttons">
+            <button id="win-exit" class="pill-button green-pill">Вперед</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно завершения задания -->
+<div id="taskCompleteOverlay" class="modal-overlay">
+    <div class="modal">
+        <p id="taskCompleteMessage"></p>
+        <button id="taskNextButton">Далее</button>
+    </div>
+</div>
+
+<div class="terminal-container">
+    <div id="terminal" class="terminal">
+        <div id="terminal-output"></div>
+        <div class="input-line">
+            <span id="prompt" class="prompt">user@astra:~$</span>
+            <input type="text" id="terminal-input" class="terminal-input" autofocus>
+        </div>
+    </div>
+</div>
+<div class="tasks">
+    <h2>Задания</h2>
+    <div id="task-container"></div>
+</div>
+
+<script>
+    // Привязка кнопок приветственного окна
+    document.getElementById('blue-pill').addEventListener('click', function () {
+        window.location.href = "{% url 'stage_seven' %}";
+    });
+    document.getElementById('red-pill').addEventListener('click', function () {
+        document.getElementById('modal-overlay').style.display = 'none';
+        document.getElementById("terminal-input").focus();
+    });
+    document.getElementById('win-exit').addEventListener('click', function () {
+        window.location.href = "{% url 'stage_seven' %}";
+    });
+
+    // Новые задания для конфигурации системных файлов
+    let tasks = [
+        {
+            id: 1,
+            description: "Выполните команду: cat /etc/hosts",
+            commands: ["cat /etc/hosts"]
+        },
+        {
+            id: 2,
+            description: "Выполните команду: grep 'localhost' /etc/hosts",
+            commands: ["grep 'localhost' /etc/hosts"]
+        },
+        {
+            id: 3,
+            description: "Выполните команду: cat /etc/resolv.conf",
+            commands: ["cat /etc/resolv.conf"]
+        },
+        {
+            id: 4,
+            description: "Выполните команду: grep 'PermitRootLogin' /etc/ssh/sshd_config",
+            commands: ["grep 'PermitRootLogin' /etc/ssh/sshd_config"]
+        },
+        {
+            id: 5,
+            description: "Выполните команду: head -n 5 /etc/ssh/sshd_config",
+            commands: ["head -n 5 /etc/ssh/sshd_config"]
+        }
+    ];
+
+    // Симулированные выводы команд
+    const simulatedOutputs = {
+        "cat /etc/hosts": "127.0.0.1    localhost\n::1          localhost ip6-localhost ip6-loopback",
+        "grep 'localhost' /etc/hosts": "127.0.0.1    localhost",
+        "cat /etc/resolv.conf": "nameserver 8.8.8.8\nnameserver 8.8.4.4",
+        "grep 'PermitRootLogin' /etc/ssh/sshd_config": "PermitRootLogin no",
+        "head -n 5 /etc/ssh/sshd_config": "Port 22\nProtocol 2\nPermitRootLogin no\nPasswordAuthentication yes\nChallengeResponseAuthentication no"
+    };
+
+    // Дополнительная информация о командах
+    const commandInfo = {
+        "cat /etc/hosts": "Команда cat выводит содержимое файла /etc/hosts, который содержит базовые сведения о локальном разрешении имён.",
+        "grep 'localhost' /etc/hosts": "Команда grep ищет слово 'localhost' в файле /etc/hosts, что позволяет убедиться, что запись о localhost присутствует.",
+        "cat /etc/resolv.conf": "Эта команда выводит настройки DNS, позволяя увидеть, какие nameserver'ы используются системой.",
+        "grep 'PermitRootLogin' /etc/ssh/sshd_config": "Команда grep ищет параметр PermitRootLogin в файле sshd_config, который определяет, разрешён ли вход под root через SSH.",
+        "head -n 5 /etc/ssh/sshd_config": "Команда head выводит первые 5 строк файла sshd_config, что помогает быстро ознакомиться с его началом и основными настройками."
+    };
+
+    let currentTaskIndex = 0;
+
+    function renderTasks() {
+        const container = document.getElementById("task-container");
+        container.innerHTML = "";
+        tasks.forEach((task, index) => {
+            let div = document.createElement("div");
+            div.className = "task";
+            if (index === currentTaskIndex) {
+                div.classList.add("active");
+            }
+            if (task.completed) {
+                div.classList.add("completed");
+            }
+            div.textContent = task.description;
+            container.appendChild(div);
+        });
+    }
+
+    function completeTask(taskId) {
+        const t = tasks.find(task => task.id === taskId);
+        if (t && !t.completed) {
+            t.completed = true;
+            renderTasks();
+            setTimeout(() => {
+                showTaskCompleteModal(taskId);
+            }, 1000);
+        }
+    }
+
+    function showTaskCompleteModal(taskId) {
+        const task = tasks.find(task => task.id === taskId);
+        if (!task) return;
+        const cmd = task.commands[0];
+        const simOutput = simulatedOutputs[cmd] || "";
+        const info = commandInfo[cmd] || "";
+        document.getElementById("taskCompleteMessage").textContent = "Поздравляем! Вы выполнили команду.\n" +
+            simOutput + "\n" + info;
+        document.getElementById("taskCompleteOverlay").style.display = "flex";
+    }
+
+    document.getElementById("taskNextButton").addEventListener("click", function () {
+        document.getElementById("taskCompleteOverlay").style.display = "none";
+        document.getElementById("terminal-output").innerHTML = "";
+        currentTaskIndex++;
+        if (currentTaskIndex < tasks.length) {
+            renderTasks();
+            appendOutput("\nСледующее задание: " + tasks[currentTaskIndex].description, "congrats");
+        } else {
+            appendOutput("\nПоздравляем, все задания выполнены!", "congrats");
+            sendCompletionStatus();
+            showWinModal();
+        }
+    });
+
+    renderTasks();
+
+    function appendOutput(text, cssClass = "") {
+        const outputDiv = document.getElementById("terminal-output");
+        let line = document.createElement("div");
+        line.className = "output " + cssClass;
+        line.textContent = text;
+        outputDiv.appendChild(line);
+        const terminal = document.getElementById("terminal");
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    document.getElementById("terminal-input").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            processCommand(this.value);
+            this.value = "";
+        }
+    });
+
+    function processCommand(command) {
+        command = command.trim();
+        if (!command) return;
+        appendOutput(document.getElementById("prompt").textContent + " " + command);
+        const expected = tasks[currentTaskIndex].commands[0];
+        if (command.toLowerCase() === expected.toLowerCase()) {
+            let simOutput = simulatedOutputs[expected] || "";
+            appendOutput(simOutput);
+            setTimeout(() => {
+                let info = commandInfo[expected] || "";
+                appendOutput("Команда выполнена верно! " + info, "congrats");
+                completeTask(tasks[currentTaskIndex].id);
+            }, 2000);
+        } else {
+            appendOutput("Неверная команда. Попробуйте ещё раз.", "congrats");
+        }
+    }
+
+    // Функция для отправки результата
+    function sendCompletionStatus() {
+        fetch("/save_quiz_result_five/", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({completed: true, step: 5})
+        })
+            .then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error("Ошибка:", error));
+    }
+
+    // Модальное окно победы
+    function showWinModal() {
+        document.getElementById('win-overlay').style.display = 'flex';
+        localStorage.setItem("confCompleted", "true");
+    }
+</script>
+</body>
+</html>

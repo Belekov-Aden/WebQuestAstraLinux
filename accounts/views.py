@@ -2,6 +2,8 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST
+from .models import StageSevenProgress
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
@@ -194,7 +196,54 @@ def save_quiz_result_five(request):
 
         return JsonResponse({"message": message, "status": "success"})
 
+@login_required
+@require_POST
+def save_progress(request):
+    try:
+        data = json.loads(request.body)
+        task_name = data.get('task_name')
+        completed = data.get('completed', False)
 
+        # Получаем или создаем запись прогресса для текущего пользователя
+        progress, created = StageSevenProgress.objects.get_or_create(user=request.user)
+
+        # Названия полей в модели StageSevenProgress
+        task_field_map = {
+            "Бейджик Инициации": "badge_initiation",
+            "Токен Командной Строки": "token_command_line",
+            "Файл Знаний": "file_knowledge",
+            "Щит Безопасности": "security_shield",
+            "Ключ Настройки": "settings_key",
+            "Оптимизирующий Бейдж": "optimization_badge"
+        }
+
+        # Проверяем, существует ли поле для этого задания
+        if task_name in task_field_map:
+            field_name = task_field_map[task_name]
+            setattr(progress, field_name, completed)
+            progress.save()
+            return JsonResponse({'status': 'success', 'message': 'Progress saved'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid task name'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@login_required
+def get_progress(request):
+    try:
+        # Получаем прогресс текущего пользователя
+        progress, created = StageSevenProgress.objects.get_or_create(user=request.user)
+        progress_dict = {
+            "Бейджик Инициации": progress.badge_initiation,
+            "Токен Командной Строки": progress.token_command_line,
+            "Файл Знаний": progress.file_knowledge,
+            "Щит Безопасности": progress.security_shield,
+            "Ключ Настройки": progress.settings_key,
+            "Оптимизирующий Бейдж": progress.optimization_badge
+        }
+        return JsonResponse({'status': 'success', 'progress': progress_dict})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 def stage_four(request):
     return render(request, 'accounts/stage_four/index.html')
 
