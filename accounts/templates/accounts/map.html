@@ -44,6 +44,25 @@
             box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
         }
 
+        /* Стили для заблокированных этапов */
+        .stage.locked {
+            background: rgba(100, 100, 100, 0.5); /* Серый фон */
+            color: #888; /* Серый текст */
+            cursor: not-allowed; /* Курсор "запрещено" */
+            pointer-events: none; /* Отключаем взаимодействие */
+            box-shadow: none; /* Убираем тень */
+        }
+
+        .stage.locked .icon {
+            filter: grayscale(100%); /* Делаем иконку серой */
+        }
+
+        .stage.locked:hover {
+            transform: none; /* Отключаем увеличение при наведении */
+            background: rgba(100, 100, 100, 0.5); /* Сохраняем серый фон */
+            box-shadow: none; /* Сохраняем отсутствие тени */
+        }
+
         .icon {
             width: 100%;
             height: 100px;
@@ -150,7 +169,7 @@
             color: white;
             display: flex;
             flex-direction: column;
-            height: calc(100% - 50px); /* Учитываем margin-top */
+            height: calc(100% - 50px);
         }
 
         .sidebar-content h3 {
@@ -209,7 +228,6 @@
         .sidebar ul {
             list-style: none;
             padding: 0;
-            flex-grow: 1; /* Растягиваем список, чтобы он занимал доступное пространство */
         }
 
         .sidebar li {
@@ -241,8 +259,8 @@
         /* Стили для кнопки "Выйти" */
         .logout-button {
             display: block;
-            margin-top: auto; /* Помещаем кнопку в самый низ */
-            margin-bottom: 40px;
+            margin-top: auto;
+            margin-bottom: 20px;
             padding: 10px 20px;
             background-color: #FF5252;
             color: white;
@@ -257,6 +275,98 @@
 
         .logout-button:hover {
             background-color: #e04848;
+        }
+
+        /* Стили для наград */
+        .awards-section {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .awards-section p {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .awards-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .award-item {
+            width: 50px;
+            height: 50px;
+            background: #2a4b9d;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .award-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .award-item.unknown {
+            background: #4b6cb7;
+            font-size: 24px;
+            color: #f4d03f;
+            font-weight: bold;
+        }
+
+        .award-item:hover {
+            transform: scale(1.1);
+        }
+
+        /* Стили для финальной награды */
+        .final-award-section {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .final-award-section p {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #f4d03f;
+        }
+
+        .final-award-item {
+            width: 60px;
+            height: 60px;
+            background: #2a4b9d;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            margin: 0 auto;
+        }
+
+        .final-award-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .final-award-item.unknown {
+            background: #4b6cb7;
+            font-size: 28px;
+            color: #f4d03f;
+            font-weight: bold;
+        }
+
+        .final-award-item:hover {
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -296,6 +406,49 @@
             {% else %}
                 <p>Вы не прошли ни одного этапа!</p>
             {% endif %}
+
+            <!-- Секция наград для этапов 1–6 -->
+            <div class="awards-section">
+                <p>Полученные награды:</p>
+                <div class="awards-list">
+                    {% for award in awards %}
+                        {% if award.completed %}
+                            <!-- Награда за выполненный этап -->
+                            <div class="award-item" title="Награда за этап {{ award.step }}">
+                                {% if award.step == 1 %}
+                                    <img src="{% static 'accounts/img/Трофей 1_not.png' %}" alt="Трофей 1">
+                                {% elif award.step == 2 %}
+                                    <img src="{% static 'accounts/img/Трофей 2_not.png' %}" alt="Трофей 2">
+                                {% elif award.step == 3 %}
+                                    <img src="{% static 'accounts/img/Трофей 3_not.png' %}" alt="Трофей 3">
+                                {% elif award.step == 4 %}
+                                    <img src="{% static 'accounts/img/Трофей 4.png' %}" alt="Трофей 4">
+                                {% elif award.step == 5 %}
+                                    <img src="{% static 'accounts/img/Трофей 5.png' %}" alt="Трофей 5">
+                                {% elif award.step == 6 %}
+                                    <img src="{% static 'accounts/img/Трофей 6.png' %}" alt="Трофей 6">
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <!-- Вопросик для невыполненного этапа -->
+                            <div class="award-item unknown" title="Награда за этап {{ award.step }}">?</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Секция финальной награды (Этап 7) -->
+            <div class="final-award-section">
+                <p>Финальная награда:</p>
+                {% if stage_seven_completed %}
+                    <div class="final-award-item" title="Финальная награда за этап 7">
+                        <img src="{% static 'accounts/img/Трофей 7_not.png' %}" alt="Трофей 7">
+                    </div>
+                {% else %}
+                    <div class="final-award-item unknown" title="Финальная награда за этап 7">?</div>
+                {% endif %}
+            </div>
+
             <!-- Кнопка "Выйти" в конце сайдбара -->
             <button class="logout-button" onclick="window.location.href='{% url 'login' %}';">Выйти</button>
         </div>
@@ -306,27 +459,27 @@
         1. Знакомство с Astra Linux
         <img src="{% static 'accounts/img/astra_linux_white.png' %}" class="icon" alt="Иконка">
     </div>
-    <div id="stage2" class="stage" onclick="window.location.href='{% url 'terminal' %}';">
+    <div id="stage2" class="stage {% if not stage_access.1 %}locked{% endif %}" {% if stage_access.1 %}onclick="window.location.href='{% url 'terminal' %}'"{% endif %}>
         2. Основы командной строки
         <i class="icon fa-solid fa-terminal fa-6x"></i>
     </div>
-    <div id="stage3" class="stage" onclick="window.location.href='{% url 'stage_three_main' %}';">
+    <div id="stage3" class="stage {% if not stage_access.2 %}locked{% endif %}" {% if stage_access.2 %}onclick="window.location.href='{% url 'stage_three_main' %}'"{% endif %}>
         3. Работа с файлами
         <i class="icon fa-solid fa-file fa-6x"></i>
     </div>
-    <div id="stage4" class="stage" onclick="window.location.href='{% url 'stage_four' %}';">
+    <div id="stage4" class="stage {% if not stage_access.3 %}locked{% endif %}" {% if stage_access.3 %}onclick="window.location.href='{% url 'stage_four' %}'"{% endif %}>
         4. Основы безопасности
         <i class="icon fa-solid fa-shield fa-6x"></i>
     </div>
-    <div id="stage5" class="stage" onclick="window.location.href='{% url 'stage_five_main' %}';">
+    <div id="stage5" class="stage {% if not stage_access.4 %}locked{% endif %}" {% if stage_access.4 %}onclick="window.location.href='{% url 'stage_five_main' %}'"{% endif %}>
         5. Конфигурационные файлы
         <i class="icon fa-solid fa-gears fa-6x"></i>
     </div>
-    <div id="stage6" class="stage" onclick="window.location.href='{% url 'stage_six' %}';">
+    <div id="stage6" class="stage {% if not stage_access.5 %}locked{% endif %}" {% if stage_access.5 %}onclick="window.location.href='{% url 'stage_six' %}'"{% endif %}>
         6. Оптимизация системы
         <i class="icon fa-solid fa-rotate-right fa-6x"></i>
     </div>
-    <div id="stage7" class="stage" onclick="window.location.href='{% url 'stage_seven' %}';">
+    <div id="stage7" class="stage {% if not stage_access.6 %}locked{% endif %}" {% if stage_access.6 %}onclick="window.location.href='{% url 'stage_seven' %}'"{% endif %}>
         7. Финальное задание
         <i class="icon fa-solid fa-bars-progress fa-6x"></i>
     </div>
