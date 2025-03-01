@@ -94,29 +94,25 @@
             left: 80%;
         }
 
-
         .background-icon-blur {
-            position: absolute; /* или relative, fixed — в зависимости от вашей вёрстки */
-
-            filter: blur(6px) brightness(0.7); /* размытие и затемнение */
-            z-index: -1; /* чтобы элемент был поверх других, если нужно */
-
+            position: absolute;
+            filter: blur(6px) brightness(0.7);
+            z-index: -1;
         }
 
         .one {
-            top: 500px; /* измените на нужное значение */
-            left: 100px; /* измените на нужное значение */
+            top: 500px;
+            left: 100px;
         }
 
         .second {
-            top: 100px; /* измените на нужное значение */
-            left: 1600px; /* измените на нужное значение */
-
+            top: 100px;
+            left: 1600px;
         }
 
         .background-icon-blur img {
-            display: block; /* убирает лишние отступы вокруг изображения */
-            width: 200%; /* или задайте нужный размер */
+            display: block;
+            width: 200%;
             height: auto;
         }
 
@@ -140,19 +136,21 @@
         .sidebar {
             position: fixed;
             top: 0;
-            left: -300px; /* Скрываем сайдбар за пределами экрана */
+            left: -300px;
             width: 300px;
             height: 100vh;
-            background-color: #0f1c49; /* Залитый фон */
+            background-color: #0f1c49;
             transition: left 0.3s ease;
             z-index: 1000;
         }
 
-        /* Контент сайдбара */
         .sidebar-content {
             margin-top: 50px;
             padding: 20px;
             color: white;
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 50px); /* Учитываем margin-top */
         }
 
         .sidebar-content h3 {
@@ -180,14 +178,12 @@
             color: yellow;
         }
 
-        /* Основной контент */
         .content {
             padding: 20px;
             margin-left: 0;
             transition: margin-left 0.3s ease;
         }
 
-        /* Открытие сайдбара при наведении на плитку */
         .trigger-tile:hover + .sidebar,
         .sidebar:hover {
             left: 0;
@@ -195,7 +191,7 @@
 
         .trigger-tile:hover + .sidebar + .content,
         .sidebar:hover + .content {
-            margin-left: 250px; /* Сдвигаем основной контент при открытии сайдбара */
+            margin-left: 250px;
         }
 
         .sidebar h3 {
@@ -213,6 +209,7 @@
         .sidebar ul {
             list-style: none;
             padding: 0;
+            flex-grow: 1; /* Растягиваем список, чтобы он занимал доступное пространство */
         }
 
         .sidebar li {
@@ -232,15 +229,35 @@
         }
 
         .passed {
-            color: #4CAF50; /* Зеленый */
+            color: #4CAF50;
             font-weight: bold;
         }
 
         .failed {
-            color: #FF5252; /* Красный */
+            color: #FF5252;
             font-weight: bold;
         }
 
+        /* Стили для кнопки "Выйти" */
+        .logout-button {
+            display: block;
+            margin-top: auto; /* Помещаем кнопку в самый низ */
+            margin-bottom: 40px;
+            padding: 10px 20px;
+            background-color: #FF5252;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #e04848;
+        }
     </style>
 </head>
 <body>
@@ -263,8 +280,7 @@
             {% if all_results %}
                 <p>Пройденные этапы:</p>
                 <ul>
-
-                {% for stat in all_results %}
+                {% for stat in all_results|dictsort:"step" %}
                     <li>
                         <span>Этап: {{ stat.step }}</span>
                         {% if stat.total_questions %}
@@ -276,14 +292,14 @@
                         {% endif %}
                     </li>
                 {% endfor %}
+                </ul>
             {% else %}
                 <p>Вы не прошли ни одного этапа!</p>
-
             {% endif %}
-            </ul>
+            <!-- Кнопка "Выйти" в конце сайдбара -->
+            <button class="logout-button" onclick="window.location.href='{% url 'login' %}';">Выйти</button>
         </div>
     </div>
-
 
     <canvas id="arrowCanvas"></canvas>
     <div id="stage1" class="stage" onclick="window.location.href='{% url 'stage_one_main' %}';">
@@ -362,7 +378,6 @@
         const extraGap = 10;
 
         // Функция для отрисовки одной изогнутой стрелки
-        // gapFrom и gapTo задают отступ от начала и конца
         function drawCurvedArrow(
             x1, y1, x2, y2,
             offset, r1, r2,
@@ -442,7 +457,6 @@
             ctx.fill();
         }
 
-        // Рисуем все стрелки, вычисляя динамический gap с учётом текущего scale блока
         arrows.forEach(({from, to, offset, shiftX = 0, shiftY = 0, extraLength = 0}) => {
             const fromEl = document.getElementById(from);
             const toEl = document.getElementById(to);
@@ -457,7 +471,6 @@
             let r1 = Math.min(fromRect.width, fromRect.height) / 2;
             let r2 = Math.min(toRect.width, toRect.height) / 2;
 
-            // Если блок hover, вычисляем его текущий scale и корректируем gap
             let scaleFrom = hoveredStages.has(from) ? getScale(fromEl) : 1;
             let scaleTo = hoveredStages.has(to) ? getScale(toEl) : 1;
             let gapFrom = baseGap + extraGap * (scaleFrom - 1);
@@ -467,13 +480,11 @@
         });
     }
 
-    // Функция, которая постоянно обновляет стрелки, пока хотя бы один блок hover
     function updateArrows() {
         drawArrows();
         animationFrameId = requestAnimationFrame(updateArrows);
     }
 
-    // Обработчики событий для всех блоков
     document.querySelectorAll('.stage').forEach(stage => {
         stage.addEventListener('mouseenter', () => {
             hoveredStages.add(stage.id);
@@ -483,7 +494,6 @@
         });
         stage.addEventListener('mouseleave', () => {
             hoveredStages.delete(stage.id);
-            // Ждем 300 мс (время анимации), затем останавливаем, если ни один блок не hover
             setTimeout(() => {
                 if (hoveredStages.size === 0 && animationFrameId) {
                     cancelAnimationFrame(animationFrameId);
