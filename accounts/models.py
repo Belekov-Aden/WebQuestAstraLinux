@@ -21,6 +21,7 @@ class QuizResult(models.Model):
     class Meta:
         verbose_name = 'Результаты по квестам'
 
+
 class StageSevenProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     badge_initiation = models.BooleanField(default=False)
