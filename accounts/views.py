@@ -66,9 +66,74 @@ def seven_levels(request):
 @login_required
 def map(request):
     usr = request.user
+    # Получаем результаты этапов 1–6 из QuizResult
     all_results = QuizResult.objects.filter(user=usr)
-    return render(request, 'accounts/map.html', {'all_results': all_results})
+    all_results_sorted = sorted(all_results, key=lambda x: x.step)
 
+    # Создаём список наград для этапов 1–6
+    total_stages = 6  # Учитываем только этапы 1–6
+    awards = []
+    for step in range(1, total_stages + 1):
+        completed = False
+        for stat in all_results_sorted:
+            if stat.step == step:
+                # Проверяем, что все задания выполнены (score == total_questions)
+                # Если total_questions не задано, проверяем score == 1
+                if stat.total_questions:
+                    completed = stat.score == stat.total_questions
+                else:
+                    completed = stat.score == 1
+                break
+        awards.append({'step': step, 'completed': completed})
+
+    # Получаем данные о 7-м этапе из StageSevenProgress
+    stage_seven_progress = StageSevenProgress.objects.filter(user=usr).first()
+    stage_seven_completed = False
+    if stage_seven_progress:
+        # Проверяем, все ли задания 7-го этапа выполнены
+        stage_seven_completed = (
+            stage_seven_progress.badge_initiation and
+            stage_seven_progress.token_command_line and
+            stage_seven_progress.file_knowledge and
+            stage_seven_progress.security_shield and
+            stage_seven_progress.settings_key and
+            stage_seven_progress.optimization_badge
+        )
+
+    # Определяем доступность этапов
+    stage_access = [False] * 7  # Список для этапов 1–7 (индексы 0–6)
+    stage_access[0] = True  # Этап 1 всегда доступен
+
+    # Проверяем доступность этапов 2–6
+    for i in range(1, total_stages):  # Индексы 1–5 (Этапы 2–6)
+        previous_stage_completed = False
+        for stat in all_results_sorted:
+            if stat.step == i:  # Проверяем предыдущий этап (i+1 — текущий этап)
+                if stat.total_questions:
+                    previous_stage_completed = stat.score == stat.total_questions
+                else:
+                    previous_stage_completed = stat.score == 1
+                break
+        stage_access[i] = previous_stage_completed
+
+    # Проверяем доступность Этапа 7
+    stage_six_completed = False
+    for stat in all_results_sorted:
+        if stat.step == 6:
+            if stat.total_questions:
+                stage_six_completed = stat.score == stat.total_questions
+            else:
+                stage_six_completed = stat.score == 1
+            break
+    stage_access[6] = stage_six_completed
+
+    context = {
+        'all_results': all_results_sorted,
+        'awards': awards,  # Награды для этапов 1–6
+        'stage_seven_completed': stage_seven_completed,  # Статус 7-го этапа
+        'stage_access': stage_access,  # Доступность этапов
+    }
+    return render(request, 'accounts/map.html', context)
 
 def stage_one_main(request):
     return render(request, 'accounts/stage_one/stage_one_main.html')
