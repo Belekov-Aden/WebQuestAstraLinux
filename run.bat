@@ -1,27 +1,23 @@
-REM Проверка, существует ли виртуальное окружение
+@echo off
+chcp 65001 >nul
+
 if not exist env (
-    echo Создаю виртуальное окружение... [Ожидайте]
+    echo Creating virtual environment... [Please wait]
     py -m venv env
 )
 
-REM Активируем виртуальное окружение
-echo Активация виртуального окружение [Ожидайте]
+echo Activating virtual environment... [Please wait]
 call env\Scripts\activate
 
-REM Установка зависимостей
-echo Установка зависимостей [Ожидайте]
+echo Installing dependencies... [Please wait]
 pip install -r requirements.txt
 
-REM Применяем миграции
-echo Примение миграции БД [Ожидайте]
-py manage.py makemigrations
-
-echo [Ожидайте]
+echo Applying migrations... [Please wait]
+py manage.py makemigrations accounts
 py manage.py migrate
 
-REM Запускаем сервер разработки Django
-echo Запуск веб-приложение перейдите по ссылке [УСПЕШНО]
+
+echo Starting Django server... Open the link [SUCCESS]
 py manage.py runserver
 
-REM Удерживаем окно открытым
 pause
