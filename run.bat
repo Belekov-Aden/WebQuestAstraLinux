@@ -17,6 +17,8 @@ pip install -r requirements.txt
 REM Применяем миграции
 echo Примение миграции БД [Ожидайте]
 py manage.py makemigrations
+
+echo [Ожидайте]
 py manage.py migrate
 
 REM Запускаем сервер разработки Django
