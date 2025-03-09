@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ ! -d "env" ]; then
+    echo "Создаю виртуальное окружение... [Ожидайте]"
+    python3 -m venv env
+fi
+
+echo "Активация виртуального окружения [Ожидайте]"
+source env/bin/activate
+
+echo "Установка зависимостей [Ожидайте]"
+pip3 install -r requirements.txt
+
+echo "Примение миграции БД [Ожидайте]"
+python3 manage.py makemigrations accounts
+python3 manage.py migrate
+
+echo "Запуск веб-приложение перейдите по ссылке [УСПЕШНО]"
+python3 manage.py runserver
+
+# Удерживаем окно открытым
+read -n 1 -s -r -p "Нажмите любую клавишу для продолжения..."
